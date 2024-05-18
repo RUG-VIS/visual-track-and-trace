@@ -40,12 +40,16 @@ find_package(netCDF REQUIRED)
 add_executable(ParticleTrackTrace MACOSX_BUNDLE main.cpp
         layers/BackgroundImage.cpp
         layers/BackgroundImage.h
+        layers/EColLayer.cpp
+        layers/EColLayer.h
         layers/EGlyphLayer.cpp
         layers/EGlyphLayer.h
         layers/Layer.cpp
         layers/Layer.h
         layers/LGlyphLayer.cpp
         layers/LGlyphLayer.h
+        layers/LColLayer.cpp
+        layers/LColLayer.h
         Program.cpp
         Program.h
         commands/TimerCallbackCommand.h
