@@ -57,15 +57,15 @@ LGlyphLayer::LGlyphLayer(std::shared_ptr<UVGrid> uvGrid, std::unique_ptr<Advecti
   this->ren->SetLayer(2);
 
   this->points = vtkSmartPointer<vtkPoints>::New();
-  this->data = vtkSmartPointer<vtkPolyData>::New();
-  this->data->SetPoints(this->points);
+  vtkNew<vtkPolyData> data;
+  data->SetPoints(this->points);
 
   this->particlesBeached = vtkSmartPointer<vtkIntArray>::New();
   this->particlesBeached->SetName("particlesBeached");
   this->particlesBeached->SetNumberOfComponents(0);
 
-  this->data->GetPointData()->AddArray(this->particlesBeached);
-  this->data->GetPointData()->SetActiveScalars("particlesBeached");
+  data->GetPointData()->AddArray(this->particlesBeached);
+  data->GetPointData()->SetActiveScalars("particlesBeached");
 
   advector = std::move(advectionKernel);
   this->uvGrid = uvGrid;
@@ -96,24 +96,13 @@ LGlyphLayer::LGlyphLayer(std::shared_ptr<UVGrid> uvGrid, std::unique_ptr<Advecti
   this->ren->AddActor(actor);
 }
 
-// creates a few points so we can test the updateData function
 void LGlyphLayer::spoofPoints() {
-    // auto id =this->points->InsertNextPoint(6.532949683882039, 53.24308582564463, 0); // Coordinates of Zernike
-    // this->particlesBeached->SetValue(id, 0);
-    // id = this->points->InsertNextPoint(5.315307819255385, 60.40001057122271, 0); // Coordinates of Bergen
-    // this->particlesBeached->SetValue(id, 0);
-    // id = this->points->InsertNextPoint( 6.646210231365825, 46.52346296009023, 0); // Coordinates of Lausanne
-    // this->particlesBeached->SetValue(id, 0);
-    // id = this->points->InsertNextPoint(-6.553894313570932, 62.39522131195857, 0); // Coordinates of the top of the Faroe islands
-    // this->particlesBeached->SetValue(id, 0);
-
   for (int i=0; i < 330; i+=5) {
     for (int j=0; j < 330; j+=5) {
       this->points->InsertNextPoint(-15.875+(12.875+15.875)/330*j, 46.125+(62.625-46.125)/330*i, 0);
       this->particlesBeached->InsertNextValue(0);
     }
   }
-
   this->points->Modified();
 }
 
@@ -134,7 +123,6 @@ void LGlyphLayer::updateData(int t) {
         this->particlesBeached->SetValue(n, this->beachedAtNumberOfTimes+1);
         continue;
       }
-
       oldX = point[0]; oldY = point[1];
 
       // supersampling

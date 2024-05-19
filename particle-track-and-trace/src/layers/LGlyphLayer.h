@@ -13,7 +13,6 @@
 class LGlyphLayer : public Layer {
 private:
   vtkSmartPointer<vtkPoints> points;
-  vtkSmartPointer<vtkPolyData> data;
   vtkSmartPointer<vtkIntArray> particlesBeached;
   std::unique_ptr<AdvectionKernel> advector;
   std::shared_ptr<UVGrid> uvGrid;
