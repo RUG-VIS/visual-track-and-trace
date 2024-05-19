@@ -27,6 +27,7 @@ vtkSmartPointer<SpawnPointCallback> LGlyphLayer::createSpawnPointCallback() {
   newPointCallBack->setRen(this->ren);
   newPointCallBack->setUVGrid(this->uvGrid);
   newPointCallBack->setBeached(this->particlesBeached);
+  newPointCallBack->setAge(this->particlesAge);
   return newPointCallBack;
 }
 
@@ -35,20 +36,24 @@ vtkSmartPointer<SpawnPointCallback> LGlyphLayer::createSpawnPointCallback() {
 /**
  * Build and returns a vtkLookupTable for the given number of colours in grayscale.
  * @param n : number of colours to add to the SetTableRange
- * @return : a vtkLookupTable with grayscale colours from [1,1,1,1] to [0.5,0.5,0.5,0.5] in n steps.
+ * @return : a vtkLookupTable with grayscale colours from [1,1,1,1] to [1,1,1,0.25] in n steps.
  */
 vtkSmartPointer<vtkLookupTable> buildLut(int n) {
   vtkNew<vtkLookupTable> lut;
-  lut->SetNumberOfColors(n+1);
+  lut->SetNumberOfColors(n);
   lut->SetTableRange(0, n);
   lut->SetScaleToLinear();
   lut->Build();
   for (int i=0; i < n; i++) {
-    lut->SetTableValue(i, 1-(0.5*i/(n-1)), 1-(0.5*i/(n-1)), 1-(0.5*i/(n-1)),  1-(0.5*i/(n-1)));
+    lut->SetTableValue(i, 1, 1, 1, 1-(0.75*i/(n-1)));
   }
-  // set the last value to separate fully beached particles from those that have simply not moved in a bit.
-  lut->SetTableValue(n-1, 0, 0, 0, 0.25);
-  lut->SetTableValue(n, 0, 0, 0, 0);
+  lut->UseAboveRangeColorOn();
+  lut->SetAboveRangeColor(1,1,1,0.20);
+  
+  // We cheat a little here: any particle with an age of -1 is out of bounds, and thus set invisible.
+  lut->UseBelowRangeColorOn();
+  lut->SetBelowRangeColor(1,1,1,0);
+
   return lut;
 }
 
@@ -57,15 +62,20 @@ LGlyphLayer::LGlyphLayer(std::shared_ptr<UVGrid> uvGrid, std::unique_ptr<Advecti
   this->ren->SetLayer(2);
 
   this->points = vtkSmartPointer<vtkPoints>::New();
-  this->data = vtkSmartPointer<vtkPolyData>::New();
-  this->data->SetPoints(this->points);
+  vtkNew<vtkPolyData> data;
+  data->SetPoints(this->points);
 
   this->particlesBeached = vtkSmartPointer<vtkIntArray>::New();
   this->particlesBeached->SetName("particlesBeached");
   this->particlesBeached->SetNumberOfComponents(0);
 
-  this->data->GetPointData()->AddArray(this->particlesBeached);
-  this->data->GetPointData()->SetActiveScalars("particlesBeached");
+  this->particlesAge = vtkSmartPointer<vtkIntArray>::New();
+  this->particlesAge->SetName("particlesAge");
+  this->particlesAge->SetNumberOfComponents(0);
+
+  data->GetPointData()->AddArray(this->particlesBeached);
+  data->GetPointData()->AddArray(this->particlesAge);
+  data->GetPointData()->SetActiveScalars("particlesAge");
 
   advector = std::move(advectionKernel);
   this->uvGrid = uvGrid;
@@ -86,8 +96,9 @@ LGlyphLayer::LGlyphLayer(std::shared_ptr<UVGrid> uvGrid, std::unique_ptr<Advecti
 
   vtkNew<vtkPolyDataMapper> mapper;
   mapper->SetInputConnection(glyph2D->GetOutputPort());
-  mapper->SetLookupTable(buildLut(this->beachedAtNumberOfTimes));
-  mapper->SetScalarRange(0, this->beachedAtNumberOfTimes+1);
+  mapper->SetColorModeToMapScalars();
+  mapper->SetLookupTable(buildLut(512));
+  mapper->UseLookupTableScalarRangeOn();
   mapper->Update();
   
   vtkNew<vtkActor> actor;
@@ -96,24 +107,14 @@ LGlyphLayer::LGlyphLayer(std::shared_ptr<UVGrid> uvGrid, std::unique_ptr<Advecti
   this->ren->AddActor(actor);
 }
 
-// creates a few points so we can test the updateData function
 void LGlyphLayer::spoofPoints() {
-    // auto id =this->points->InsertNextPoint(6.532949683882039, 53.24308582564463, 0); // Coordinates of Zernike
-    // this->particlesBeached->SetValue(id, 0);
-    // id = this->points->InsertNextPoint(5.315307819255385, 60.40001057122271, 0); // Coordinates of Bergen
-    // this->particlesBeached->SetValue(id, 0);
-    // id = this->points->InsertNextPoint( 6.646210231365825, 46.52346296009023, 0); // Coordinates of Lausanne
-    // this->particlesBeached->SetValue(id, 0);
-    // id = this->points->InsertNextPoint(-6.553894313570932, 62.39522131195857, 0); // Coordinates of the top of the Faroe islands
-    // this->particlesBeached->SetValue(id, 0);
-
   for (int i=0; i < 330; i+=5) {
     for (int j=0; j < 330; j+=5) {
       this->points->InsertNextPoint(-15.875+(12.875+15.875)/330*j, 46.125+(62.625-46.125)/330*i, 0);
       this->particlesBeached->InsertNextValue(0);
+      this->particlesAge->InsertNextValue(0);
     }
   }
-
   this->points->Modified();
 }
 
@@ -124,16 +125,23 @@ void LGlyphLayer::updateData(int t) {
 
   // iterate over every point.
   for (vtkIdType n=0; n < this->points->GetNumberOfPoints(); n++) {
+    // first check: only update points within our grid's boundary.
+    this->points->GetPoint(n, point);
+    if (point[0] <= this->uvGrid->lonMin() or point[0] >= this->uvGrid->lonMax() or point[1] <= this->uvGrid->latMin() or point[1] >= this->uvGrid->latMax()) {
+      // sets any particle out of bounds to be beached - so it gets assigned the right colour in the lookup table.
+      this->particlesBeached->SetValue(n, this->beachedAtNumberOfTimes+1);
+      this->particlesAge->SetValue(n, -1);
+      continue;
+    }
+    
+    // update particle age.
+    int age = this->particlesAge->GetValue(n);
+    if (age >= 0)
+      this->particlesAge->SetValue(n, age+1);
+
+    // second check: only update non-beached particles.
     int beachedFor = this->particlesBeached->GetValue(n);
-    // first check: only update non-beached particles.
     if (beachedFor < this->beachedAtNumberOfTimes-1) {
-      this->points->GetPoint(n, point);
-      // second check: only update points within our grid's boundary.
-      if (point[0] <= this->uvGrid->lonMin() or point[0] >= this->uvGrid->lonMax() or point[1] <= this->uvGrid->latMin() or point[1] >= this->uvGrid->latMax()) {
-        // sets any particle out of bounds to be beached - so it gets assigned the right colour in the lookup table.
-        this->particlesBeached->SetValue(n, this->beachedAtNumberOfTimes+1);
-        continue;
-      }
 
       oldX = point[0]; oldY = point[1];
 
@@ -152,7 +160,10 @@ void LGlyphLayer::updateData(int t) {
       }
     }
   }
-  if (modifiedData) this->points->Modified();
+  if (modifiedData) {
+    this->particlesAge->Modified();
+    this->points->Modified();
+  }
 }
 
 void LGlyphLayer::addObservers(vtkSmartPointer<vtkRenderWindowInteractor> interactor) {

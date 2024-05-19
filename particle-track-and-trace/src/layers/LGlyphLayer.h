@@ -15,6 +15,7 @@ private:
   vtkSmartPointer<vtkPoints> points;
   vtkSmartPointer<vtkPolyData> data;
   vtkSmartPointer<vtkIntArray> particlesBeached;
+  vtkSmartPointer<vtkIntArray> particlesAge;
   std::unique_ptr<AdvectionKernel> advector;
   std::shared_ptr<UVGrid> uvGrid;
   int dt = 3600;
