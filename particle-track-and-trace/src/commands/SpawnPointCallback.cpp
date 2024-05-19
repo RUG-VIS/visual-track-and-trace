@@ -42,10 +42,10 @@ void SpawnPointCallback::Execute(vtkObject *caller, unsigned long evId, void *ca
 
     points->InsertNextPoint(worldPos[0], worldPos[1], 0);
     this->particlesBeached->InsertNextValue(0);
+    this->particlesAge->InsertNextValue(0);
 
     // FIXME:  The below lines cause some weird interaction with our vtkTimer.
     // see github issue  https://github.com/MakeNEnjoy/interactive-track-and-trace/issues/28
-    this->particlesBeached->Modified();
     this->points->Modified();
     ren->GetRenderWindow()->Render();
 }
@@ -79,4 +79,8 @@ void SpawnPointCallback::setUVGrid(const std::shared_ptr<UVGrid> &uvGrid) {
 
 void SpawnPointCallback::setBeached(const vtkSmartPointer<vtkIntArray> &ints) {
   this->particlesBeached = ints;
+}
+
+void SpawnPointCallback::setAge(const vtkSmartPointer<vtkIntArray> &ints) {
+  this->particlesAge = ints;
 }

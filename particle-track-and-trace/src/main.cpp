@@ -31,7 +31,7 @@ int main() {
   cout << "Starting vtk..." << endl;
 
   auto l = new LGlyphLayer(uvGrid, std::move(kernelRK4BoundaryChecked));
-//  l->spoofPoints();
+  l->spoofPoints();
   l->setDt(DT);
 
   unique_ptr<Program> program = make_unique<Program>(DT);
