@@ -33,10 +33,11 @@ int main() {
   auto l = new LGlyphLayer(uvGrid, std::move(kernelRK4BoundaryChecked));
   l->spoofPoints();
   l->setDt(DT);
+  // TODO: implement feature to call this function on widget
   l->cycleGlyphStyle();
 
   unique_ptr<Program> program = make_unique<Program>(DT);
-  program->addLayer(new BackgroundImage(dataPath + "/map_qgis.png"));
+  program->addLayer(new BackgroundImage(dataPath + "/map_qgis_1035.png"));
   // program->addLayer(new EGlyphLayer(uvGrid));
   program->addLayer(new EColLayer(uvGrid));
   program->addLayer(l);
