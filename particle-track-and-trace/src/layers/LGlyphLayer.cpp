@@ -36,9 +36,33 @@ vtkSmartPointer<SpawnPointCallback> LGlyphLayer::createSpawnPointCallback() {
 /**
  * Build and returns a vtkLookupTable for the given number of colours in grayscale.
  * @param n : number of colours to add to the SetTableRange
+ * @return : a vtkLookupTable with grayscale colours from [1,1,1,1] to [0.25, 0.25, 0.25, 1] in n steps.
+ */
+vtkSmartPointer<vtkLookupTable> buildLutBrightness(int n) {
+  vtkNew<vtkLookupTable> lut;
+  lut->SetNumberOfColors(n);
+  lut->SetTableRange(0, n);
+  lut->SetScaleToLinear();
+  lut->Build();
+  for (int i=0; i < n; i++) {
+    lut->SetTableValue(i, 1-(0.75*i/(n-1)), 1-(0.75*i/(n-1)), 1-(0.75*i/(n-1)), 1);
+  }
+  lut->UseAboveRangeColorOn();
+  lut->SetAboveRangeColor(0.2, 0.2, 0.2, 1);
+  
+  // We cheat a little here: any particle with an age of -1 is out of bounds, and thus set invisible.
+  lut->UseBelowRangeColorOn();
+  lut->SetBelowRangeColor(1,1,1,0);
+
+  return lut;
+}
+
+/**
+ * Build and returns a vtkLookupTable for the given number of colours in grayscale.
+ * @param n : number of colours to add to the SetTableRange
  * @return : a vtkLookupTable with grayscale colours from [1,1,1,1] to [1,1,1,0.25] in n steps.
  */
-vtkSmartPointer<vtkLookupTable> buildLut(int n) {
+vtkSmartPointer<vtkLookupTable> buildLutOpacity(int n) {
   vtkNew<vtkLookupTable> lut;
   lut->SetNumberOfColors(n);
   lut->SetTableRange(0, n);
@@ -58,6 +82,9 @@ vtkSmartPointer<vtkLookupTable> buildLut(int n) {
 }
 
 LGlyphLayer::LGlyphLayer(std::shared_ptr<UVGrid> uvGrid, std::unique_ptr<AdvectionKernel> advectionKernel) {
+  this->luts.push(buildLutOpacity(512));
+  this->luts.push(buildLutBrightness(512));
+
   this->ren = vtkSmartPointer<vtkRenderer>::New();
   this->ren->SetLayer(2);
 
@@ -94,15 +121,20 @@ LGlyphLayer::LGlyphLayer(std::shared_ptr<UVGrid> uvGrid, std::unique_ptr<Advecti
   glyph2D->SetScaleModeToDataScalingOff();
   glyph2D->Update();
 
-  vtkNew<vtkPolyDataMapper> mapper;
-  mapper->SetInputConnection(glyph2D->GetOutputPort());
-  mapper->SetColorModeToMapScalars();
-  mapper->SetLookupTable(buildLut(512));
-  mapper->UseLookupTableScalarRangeOn();
-  mapper->Update();
+  this->mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
+  this->mapper->SetInputConnection(glyph2D->GetOutputPort());
+  this->mapper->SetColorModeToMapScalars();
+
+  auto lut = this->luts.front();
+  mapper->SetLookupTable(lut);
+  this->luts.pop();
+  this->luts.push(lut);
+
+  this->mapper->UseLookupTableScalarRangeOn();
+  this->mapper->Update();
   
   vtkNew<vtkActor> actor;
-  actor->SetMapper(mapper);
+  actor->SetMapper(this->mapper);
 
   this->ren->AddActor(actor);
 }
@@ -173,6 +205,13 @@ void LGlyphLayer::addObservers(vtkSmartPointer<vtkRenderWindowInteractor> intera
   interactor->AddObserver(vtkCommand::MouseMoveEvent, newPointCallBack);
 }
 
+
+void LGlyphLayer::cycleGlyphStyle() {
+  auto lut = this->luts.front();
+  this->mapper->SetLookupTable(lut);
+  this->luts.pop();
+  this->luts.push(lut);
+}
 
 void LGlyphLayer::setDt(int dt) {
   this->dt = dt;
