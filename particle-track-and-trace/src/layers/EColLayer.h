@@ -15,6 +15,7 @@
 class EColLayer : public Layer {
 private:
   vtkSmartPointer<vtkDoubleArray> strength;
+  vtkSmartPointer<vtkDoubleArray> direction;
   std::shared_ptr<UVGrid> uvGrid;
   int numLats;
   int numLons;

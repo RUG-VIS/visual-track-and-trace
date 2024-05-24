@@ -2,6 +2,7 @@
 #include <vtkGeneralTransform.h>
 #include <vtkGeoProjection.h>
 #include <vtkGeoTransform.h>
+#include <vtkLookupTable.h>
 #include <vtkPointData.h>
 #include <vtkAbstractTransform.h>
 #include <vtkOutlineSource.h>
@@ -24,8 +25,9 @@
 
 #include "../CartographicTransformation.h"
 
-using namespace std;
+using std::numbers::pi;
 
+using namespace std;
 
 EColLayer::EColLayer(std::shared_ptr<UVGrid> uvGrid) {
   this->ren = vtkSmartPointer<vtkRenderer>::New();
@@ -41,9 +43,53 @@ EColLayer::EColLayer(std::shared_ptr<UVGrid> uvGrid) {
   this->strength->SetNumberOfComponents(1);
   this->strength->SetNumberOfTuples((numLats-1)*(numLons-1));
 
+  this->direction = vtkSmartPointer<vtkDoubleArray>::New();
+  this->direction->SetName("direction");
+  this->direction->SetNumberOfComponents(1);
+  this->direction->SetNumberOfTuples((numLats-1)*(numLons-1));
+
   readCoordinates();
 }
 
+/**
+  * Sets a given rgba colour to a range of values [start, end] in the lut.
+  * @param lut : lookuptable to operate on.
+  * @ param start : starting index of range to assign
+  * @ param end: ending index of range to assign
+  * @param r : red value [0,1]
+  * @param g : green value [0,1]
+  * @param n : blue value [0,1]
+  * @param a : alpha value [0,1]
+  */
+void setLutRange(vtkSmartPointer<vtkLookupTable> lut, int start, int end, double r, double g, double b, double a) {
+  for (int i=start; i <= end; i++) {
+    lut->SetTableValue(i, r, g, b, a);
+  }
+}
+
+// builds a 4-way lookuptable, used to encode the directional component
+vtkSmartPointer<vtkLookupTable> buildLutDirs() {
+  vtkNew<vtkLookupTable> lut;
+  lut->SetNumberOfColors(360);
+  lut->SetTableRange(0, 359);
+  lut->SetScaleToLinear();
+  lut->Build();
+  //currently builds a corkO cyclic colour map, divided into 8 colours (see https://www.fabiocrameri.ch/cycliccolourmaps/)
+  setLutRange(lut, 000, 020, 0.247, 0.243, 0.227, 1);
+  setLutRange(lut, 021, 060, 0.243, 0.267, 0.365, 1);
+  setLutRange(lut, 061, 100, 0.318, 0.416, 0.557, 1);
+  setLutRange(lut, 101, 140, 0.518, 0.620, 0.729, 1);
+  setLutRange(lut, 141, 180, 0.667, 0.757, 0.773, 1);
+  setLutRange(lut, 181, 220, 0.631, 0.769, 0.651, 1);
+  setLutRange(lut, 221, 260, 0.451, 0.639, 0.435, 1);
+  setLutRange(lut, 261, 300, 0.298, 0.431, 0.224, 1);
+  setLutRange(lut, 301, 340, 0.263, 0.310, 0.173, 1);
+  setLutRange(lut, 341, 359, 0.247, 0.243, 0.227, 1);
+
+  lut->SetNanColor(0,0,0,0);
+
+  return lut;
+}
 
 // TODO: Bit of a superfunction here; can do with some refactoring.
 void EColLayer::readCoordinates() {
@@ -64,27 +110,26 @@ void EColLayer::readCoordinates() {
     for (auto lat : uvGrid->lats) {
       double out[3] = {lon, lat, 0};
       transform->TransformPoint(out, out);
-      // cout << "inserting point (" << pointId << "): " << out[0] << " " << out[1] << endl;
       points->InsertPoint(pointId++, out[0], out[1], 0);
       
+      // logic for adding cells
       if (latIndex > 0 and lonIndex > 0 ) {
         int idx = latIndex+lonIndex*numLats;
-        // cout << idx << " at " << lonIndex << " " << latIndex << endl;
         vtkNew<vtkIdList> l;
         l->SetNumberOfIds(4);
         l->SetId(0, idx-1);
         l->SetId(1, idx-numLats-1);
         l->SetId(2, idx-numLats);
         l->SetId(3, idx);
-        // cout << "inserting cell: " << idx-1 << " " << idx-numLats-1 << " " << idx- numLats<< " " << idx << endl;
+
         double coords[12];
         points->GetPoint(idx-1, coords);
         points->GetPoint(idx-numLats-1, coords+3);
         points->GetPoint(idx-numLats, coords+6);
         points->GetPoint(idx, coords+9);
-        // cout << "Inserting cell with points at: (" << coords[0] << " " << coords[1] << "), (" << coords[3] << " " << coords[4] << "), (" << coords[6] << " " << coords[7] << "), (" << coords[9] << " " << coords[10] << ")" << endl;
         data->InsertNextCell(VTK_QUAD, l);
 
+        // ltake the average of the four surrounding points as the cell's velocity.
         double u=0, v=0;
         for (int j=0; j < 2; j++  )   {
           for (int k=0; k < 2; k++  )   {
@@ -95,7 +140,8 @@ void EColLayer::readCoordinates() {
         }
         u /= 4;
         v /= 4;
-        this->strength->SetTuple1(cellId++, std::sqrt(u*u + v*v));
+        this->strength->SetTuple1(cellId, std::sqrt(u*u + v*v));
+        this->direction->SetTuple1(cellId++, atan(u/v)*180/pi);
       }
       latIndex++;
     }
@@ -103,11 +149,15 @@ void EColLayer::readCoordinates() {
   }
 
   data->GetCellData()->AddArray(this->strength);
-  data->GetCellData()->SetActiveScalars("strength");
+  data->GetCellData()->AddArray(this->direction);
+  // data->GetCellData()->SetActiveScalars("strength");
 
   vtkNew<vtkPolyDataMapper>(mapper);
   mapper->SetInputData(data);
+  mapper->SetLookupTable(buildLutDirs());
+  mapper->UseLookupTableScalarRangeOn();
   mapper->Update();
+  data->GetCellData()->SetActiveScalars("direction");
 
   vtkNew<vtkActor> actor;
   actor->SetMapper(mapper);
@@ -137,7 +187,8 @@ void EColLayer::updateData(int t)   {
       }
       u /= 4;
       v /= 4;
-      this->strength->SetTuple1(i++, std::sqrt(u*u + v*v));
+      this->strength->SetTuple1(i, std::sqrt(u*u + v*v));
+      this->direction->SetTuple1(i++, atan(u/v)*180/pi);
     }
   }
   this->strength->Modified();
