@@ -162,7 +162,7 @@ void EColLayer::readCoordinates() {
   vtkNew<vtkActor> actor;
   actor->SetMapper(mapper);
   actor->GetProperty()->SetColor(0, 1, 0);
-  actor->GetProperty()->SetOpacity(0.2);
+  actor->GetProperty()->SetOpacity(0.5);
 
   // vtkNew<vtkActor> act2;
   // act2->SetMapper(mapper);
