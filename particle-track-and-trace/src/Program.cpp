@@ -14,6 +14,7 @@
 #include <netcdf>
 #include <vtkArrowSource.h>
 #include <vtkNew.h>
+#include <vtkGenericOpenGLRenderWindow.h>
 #include <vtkCallbackCommand.h>
 #include <vtkInteractorStyleUser.h>
 
@@ -27,11 +28,11 @@ void Program::setWinProperties() {
   this->win->SetSize(661, 661);
   this->win->SetDesiredUpdateRate(60);
 
-  this->interact->SetRenderWindow(this->win);
+  this->interact->SetRenderWindow(this->win.Get());
   this->interact->Initialize();
 
   vtkNew<vtkInteractorStyleUser> style;
-  interact->SetInteractorStyle(style);
+  this->interact->SetInteractorStyle(style);
 }
 
 void Program::setupTimer(int dt) {
@@ -50,10 +51,12 @@ void Program::setupCameraCallback() {
   this->interact->AddObserver(vtkCommand::KeyPressEvent, callback);
 }
 
-
-Program::Program(int timerDT) {
-  this->win = vtkSmartPointer<vtkRenderWindow>::New();
-  this->interact = vtkSmartPointer<vtkRenderWindowInteractor>::New();
+Program::Program(int timerDT, vtkSmartPointer<vtkGenericOpenGLRenderWindow> win) {
+  // this->win = vtkSmartPointer<vtkGenericOpenGLRenderWindow>::New();
+  this->win = win;
+  // this->interact = vtkSmartPointer<vtkRenderWindowInteractor>::New();
+  // this->interact = vtkSmartPointer<QVTKInteractor>::New();
+  this->interact = win->GetInteractor();
   this->cam = createNormalisedCamera();
 
   this->win->SetNumberOfLayers(0);
@@ -91,7 +94,7 @@ void Program::updateData(int t) {
 
 void Program::setupInteractions() {
   for (Layer *l: layers) {
-    l->addObservers(interact);
+    l->addObservers(this->interact);
   }
 }
 

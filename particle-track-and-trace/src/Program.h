@@ -1,6 +1,7 @@
 #ifndef PROGRAM_H
 #define PROGRAM_H
 
+#include <QVTKOpenGLNativeWidget.h>
 #include <vtkRenderWindow.h>
 #include <vtkRenderWindowInteractor.h>
 #include <vtkRenderer.h>
@@ -18,11 +19,13 @@ private:
 
   /** The window this program's layers render to.
     */ 
-  vtkSmartPointer<vtkRenderWindow> win;
+  // vtkSmartPointer<vtkRenderWindow> win;
+  vtkSmartPointer<vtkGenericOpenGLRenderWindow> win;
 
   /** The interactor through which the layers can interact with the window.
     */ 
   vtkSmartPointer<vtkRenderWindowInteractor> interact;
+  // vtkSmartPointer<QVTKInteractor> interact;
 
 
   /** The camera used by all layers for this program.
@@ -37,9 +40,6 @@ private:
     */ 
   void setupTimer(int dt);
 
-  /** This function adds all interactors of each layer to the interactor/window
-    */ 
-  void setupInteractions();
 
   /** This function sets up the camera's associated movement callbacks..
     */ 
@@ -48,7 +48,7 @@ private:
 public:
   /** Constructor.
     */ 
-  Program(int timerDT);
+  Program(int timerDT, vtkSmartPointer<vtkGenericOpenGLRenderWindow> win);
 
   /** This function adds a new layer (and thus vtkRenderer) to the program.
     * The layer is expected to set its own position in the vtkRenderWindow layer system.
@@ -68,11 +68,16 @@ public:
     */
   void updateData(int t);
 
+  /** This function adds all interactors of each layer to the interactor/window
+    */ 
+  void setupInteractions();
+
   /**
    * This function renders the vtkRenderWindow for the first time.
    * Only call this function once!
    */
   void render();
+
 };
 
 #endif
