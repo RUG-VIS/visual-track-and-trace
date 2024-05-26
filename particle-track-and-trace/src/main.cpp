@@ -40,35 +40,37 @@ int main(int argc, char* argv[]) {
   QApplication app(argc, argv);
 
   // Main window.
-  QMainWindow mainWindow;
+  MainWindow mainWindow;
   mainWindow.resize(1200, 900);
 
+  mainWindow.show();
+  return app.exec();
+
   // Control area.
-  QDockWidget controlDock;
-  mainWindow.addDockWidget(Qt::LeftDockWidgetArea, &controlDock);
-
-  QLabel controlDockTitle("Control Dock");
-  controlDockTitle.setMargin(20);
-  controlDock.setTitleBarWidget(&controlDockTitle);
-
-  QPointer<QVBoxLayout> dockLayout = new QVBoxLayout();
-  QWidget layoutContainer;
-  layoutContainer.setLayout(dockLayout);
-  controlDock.setWidget(&layoutContainer);
-
-  QPushButton randomizeButton;
-  randomizeButton.setText("Randomize");
-  dockLayout->addWidget(&randomizeButton);
+  // QDockWidget controlDock;
+  // mainWindow.addDockWidget(Qt::LeftDockWidgetArea, &controlDock);
+  //
+  // QLabel controlDockTitle("Control Dock");
+  // controlDockTitle.setMargin(20);
+  // controlDock.setTitleBarWidget(&controlDockTitle);
+  //
+  // QPointer<QVBoxLayout> dockLayout = new QVBoxLayout();
+  // QWidget layoutContainer;
+  // layoutContainer.setLayout(dockLayout);
+  // controlDock.setWidget(&layoutContainer);
+  //
+  // QPushButton randomizeButton;
+  // randomizeButton.setText("Randomize");
+  // dockLayout->addWidget(&randomizeButton);
 
   // Render area.
-  QPointer<QVTKOpenGLNativeWidget> vtkRenderWidget =
-      new QVTKOpenGLNativeWidget();
-  mainWindow.setCentralWidget(vtkRenderWidget);
+  // QPointer<QVTKOpenGLNativeWidget> vtkRenderWidget =
+  //     new QVTKOpenGLNativeWidget();
+  // mainWindow.setCentralWidget(vtkRenderWidget);
 
   // VTK part.
-  vtkNew<vtkGenericOpenGLRenderWindow> window;
-  vtkRenderWidget->setRenderWindow(window.Get());
-
+  // vtkNew<vtkGenericOpenGLRenderWindow> window;
+  // vtkRenderWidget->setRenderWindow(window.Get());
 
   cout << "Reading data..." << endl;
   string dataPath = "../../../../data";
@@ -83,7 +85,7 @@ int main(int argc, char* argv[]) {
   // TODO: implement feature to call this function on widget
   // l->cycleGlyphStyle();
 
-  unique_ptr<Program> program = make_unique<Program>(DT, window);
+  unique_ptr<Program> program = make_unique<Program>();
   program->addLayer(new BackgroundImage(dataPath + "/map_qgis_1035.png"));
   // TODO: implement feature to cycle between layers thru QT
   program->addLayer(new EGlyphLayer(uvGrid));

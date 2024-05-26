@@ -11,7 +11,9 @@
 /** This class manages the upper levels of the vtk pipeline; it has attributes for the vtkrenderWindow and a vector of Layers to represent a variable number of vtkRenderers.
   * It can also set up a vtkTimer by connecting an instance of TimerCallbackCommand with its contained vtkRenderWindowInteractor.
   */ 
-class Program {
+class Program : public QVTKOpenGLNativeWidget {
+  Q_OBJECT
+
 private:
   /** This attribute models a variable number of vtkRenderers, managed through the abstract Layer class.
     */ 
@@ -48,7 +50,8 @@ private:
 public:
   /** Constructor.
     */ 
-  Program(int timerDT, vtkSmartPointer<vtkGenericOpenGLRenderWindow> win);
+  Program(QWidget *parent = nullptr);
+  ~Program() override;
 
   /** This function adds a new layer (and thus vtkRenderer) to the program.
     * The layer is expected to set its own position in the vtkRenderWindow layer system.

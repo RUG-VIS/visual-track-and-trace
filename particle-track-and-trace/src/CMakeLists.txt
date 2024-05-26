@@ -5,6 +5,7 @@ project(ParticleTrackTrace)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+set(CMAKE_AUTOMOC ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 find_package(Qt5Core REQUIRED)
@@ -77,9 +78,10 @@ add_executable(ParticleTrackTrace MACOSX_BUNDLE main.cpp
         advection/Vel.h
         advection/kernel/SnapBoundaryConditionKernel.h
         advection/kernel/SnapBoundaryConditionKernel.cpp
-        # QT/MainWindow.h
-        # QT/MainWindow.cpp
-        # QT/MainWindow.ui
+        QT/MainWindow.h
+        QT/MainWindow.cpp
+        QT/MainWindow.ui
+        QT/ui_mainwindow.h
 )
 
 execute_process(

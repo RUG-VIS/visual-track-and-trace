@@ -51,17 +51,17 @@ void Program::setupCameraCallback() {
   this->interact->AddObserver(vtkCommand::KeyPressEvent, callback);
 }
 
-Program::Program(int timerDT, vtkSmartPointer<vtkGenericOpenGLRenderWindow> win) {
-  // this->win = vtkSmartPointer<vtkGenericOpenGLRenderWindow>::New();
-  this->win = win;
+Program::Program(QWidget *parent): QVTKOpenGLNativeWidget(parent) {
+  this->win = vtkSmartPointer<vtkGenericOpenGLRenderWindow>::New();
   // this->interact = vtkSmartPointer<vtkRenderWindowInteractor>::New();
   // this->interact = vtkSmartPointer<QVTKInteractor>::New();
+  setRenderWindow(this->win);
   this->interact = win->GetInteractor();
   this->cam = createNormalisedCamera();
 
   this->win->SetNumberOfLayers(0);
   setWinProperties();
-  setupTimer(timerDT);
+  setupTimer(60 * 60); // FIXME: manually tracking this variable is a little stupid.
   setupCameraCallback();
 }
 
@@ -102,4 +102,8 @@ void Program::render() {
   setupInteractions();
   win->Render();
   interact->Start();
+}
+
+Program::~Program() {
+  cout << "deleting program" << endl;
 }
