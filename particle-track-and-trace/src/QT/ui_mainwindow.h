@@ -214,7 +214,7 @@ public:
         verticalLayout_16->addWidget(FullySampledButton);
 
         RegularlySubsampledButton = new QRadioButton(GlyphBox_2);
-        RegularlySubsampledButton->setObjectName(QString::fromUtf8("RegularlySampledButton"));
+        RegularlySubsampledButton->setObjectName(QString::fromUtf8("RegularlySubsampledButton"));
 
         verticalLayout_16->addWidget(RegularlySubsampledButton);
 

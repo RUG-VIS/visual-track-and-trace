@@ -71,7 +71,7 @@ void MainWindow::on_SecondButton_clicked(bool checked) {
 }
 
 
-void MainWindow::on_ComplentaryButton_clicked(bool checked) {
+void MainWindow::on_ComplementaryButton_clicked(bool checked) {
   if (checked) {
 
   }
@@ -148,7 +148,7 @@ void MainWindow::on_RegularlySubsampledButton_clicked(bool checked) {
 }
 
 
-void MainWindow::on_IregularlySampledButton_clicked(bool checked) {
+void MainWindow::on_IregularlySubsampledButton_clicked(bool checked) {
   if (checked) {
 
   }}
