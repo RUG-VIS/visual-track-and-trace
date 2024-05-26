@@ -1,3 +1,4 @@
+#include <stdexcept>
 #include <vtkRenderWindow.h>
 #include <vtkPointData.h>
 #include <vtkDoubleArray.h>
@@ -53,11 +54,10 @@ void Program::setupCameraCallback() {
 
 Program::Program(QWidget *parent): QVTKOpenGLNativeWidget(parent) {
   this->win = vtkSmartPointer<vtkGenericOpenGLRenderWindow>::New();
-  // this->interact = vtkSmartPointer<vtkRenderWindowInteractor>::New();
-  // this->interact = vtkSmartPointer<QVTKInteractor>::New();
   setRenderWindow(this->win);
   this->interact = win->GetInteractor();
   this->cam = createNormalisedCamera();
+  this->activeIdx = -1;
 
   this->win->SetNumberOfLayers(0);
   setWinProperties();
@@ -66,44 +66,55 @@ Program::Program(QWidget *parent): QVTKOpenGLNativeWidget(parent) {
 }
 
 
-void Program::addLayer(Layer *layer) {
-  layer->setCamera(this->cam);
+void Program::addTechnique(Technique *technique) {
+  this->techniques.push_back(technique);
 
-  this->layers.push_back(layer);
-  this->win->AddRenderer(layer->getLayer());
-  this->win->SetNumberOfLayers(this->win->GetNumberOfLayers() + 1);
 }
 
-void Program::removeLayer(Layer *layer) {
-  this->win->RemoveRenderer(layer->getLayer());
-
-  auto it = std::find(this->layers.begin(), this->layers.end(), layer);
-  if (it != this->layers.end()) {
-    this->layers.erase(it);
-    this->win->SetNumberOfLayers(this->win->GetNumberOfLayers() - 1);
+void Program::removeTechnique(Technique *technique) {
+  auto it = std::find(this->techniques.begin(), this->techniques.end(), technique);
+  if (it != this->techniques.end()) {
+    int idx = it - this->techniques.begin();
+    if (idx == this->activeIdx) {
+      throw std::out_of_range("Can't remove active technique.");
+    }
+    this->techniques.erase(it);
+    this->activeIdx = -1;
+    setActiveTechnique(0);
   }
 }
-
 
 void Program::updateData(int t) {
+  // FIXME: think on how to update techniques; do we update all? just active? unsure.
   win->Render();
-  for (Layer *l: layers) {
-    l->updateData(t);
-  }
+  this->techniques[this->activeIdx]->updateData(t);
 }
 
-void Program::setupInteractions() {
-  for (Layer *l: layers) {
-    l->addObservers(this->interact);
+void Program::setActiveTechnique(int idx) {
+  // Only change things if a different technique has been selected.
+  if (idx == this->activeIdx) {
+    return;
   }
+
+  // check the given idx is valid.
+  if (idx >= this->techniques.size()) {
+    throw std::out_of_range("Index out of range!");
+  }
+
+  if (this->activeIdx >= 0 and this->activeIdx < this->techniques.size())
+    this->techniques[this->activeIdx]->unbind(this->win, this->interact);
+
+  this->techniques[idx]->bind(this->win, this->interact);
+  
+  this->activeIdx = idx;
 }
 
-void Program::render() {
-  setupInteractions();
-  win->Render();
-  interact->Start();
-}
 
 Program::~Program() {
   cout << "deleting program" << endl;
+}
+
+
+vtkSmartPointer<vtkCamera> Program::getCamera() {
+  return this->cam;
 }

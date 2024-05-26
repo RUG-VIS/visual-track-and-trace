@@ -23,6 +23,7 @@ private:
   int dt = 3600;
   int beachedAtNumberOfTimes = 20;
   std::queue<vtkSmartPointer<vtkLookupTable>> luts;
+  vtkSmartPointer<SpawnPointCallback> callback;
 
 public:
   /** Constructor.
@@ -43,6 +44,7 @@ public:
   vtkSmartPointer<SpawnPointCallback> createSpawnPointCallback();
 
   void addObservers(vtkSmartPointer<vtkRenderWindowInteractor> interactor) override;
+  void removeObservers(vtkSmartPointer<vtkRenderWindowInteractor> interactor) override;
 
   /** This function cycles which lut is used for the layer, according to the lookuptables in the luts attribute.
    */

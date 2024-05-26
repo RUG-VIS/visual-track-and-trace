@@ -54,6 +54,8 @@ add_executable(ParticleTrackTrace MACOSX_BUNDLE main.cpp
         layers/Layer.h
         layers/LGlyphLayer.cpp
         layers/LGlyphLayer.h
+        layers/Technique.cpp
+        layers/Technique.h
         Program.cpp
         Program.h
         commands/TimerCallbackCommand.h

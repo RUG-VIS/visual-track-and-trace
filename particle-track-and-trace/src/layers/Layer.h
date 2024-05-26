@@ -28,10 +28,16 @@ public:
     */
   virtual void addObservers(vtkSmartPointer<vtkRenderWindowInteractor> interactor);
 
+
+  /** Removes observers to the renderWindowinteractor within which this layer is active.
+    * @param interactor : pointer to the interactor that observers can be removed from.
+    */
+  virtual void removeObservers(vtkSmartPointer<vtkRenderWindowInteractor> interactor);
+
   /** Sets the active camera for the vtkRenderer associated with this layer.
     * Used to share one camera between multiple layers.
     */ 
-  virtual void setCamera(vtkCamera *camera);
+  virtual void setCamera(vtkSmartPointer<vtkCamera> cam);
 };
 
 #endif

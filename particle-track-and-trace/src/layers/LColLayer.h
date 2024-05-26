@@ -40,6 +40,7 @@ public:
   vtkSmartPointer<SpawnPointCallback> createSpawnPointCallback();
 
   void addObservers(vtkSmartPointer<vtkRenderWindowInteractor> interactor) override;
+  void removeObservers(vtkSmartPointer<vtkRenderWindowInteractor> interactor) override;
 
 
   /** 

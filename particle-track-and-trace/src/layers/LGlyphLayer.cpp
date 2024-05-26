@@ -21,7 +21,7 @@
 #include "../CartographicTransformation.h"
 
 vtkSmartPointer<SpawnPointCallback> LGlyphLayer::createSpawnPointCallback() {
-  auto newPointCallBack = vtkSmartPointer<SpawnPointCallback>::New();
+  vtkNew<SpawnPointCallback> newPointCallBack;
   newPointCallBack->setData(this->data);
   newPointCallBack->setPoints(this->points);
   newPointCallBack->setRen(this->ren);
@@ -137,6 +137,8 @@ LGlyphLayer::LGlyphLayer(std::shared_ptr<UVGrid> uvGrid, std::unique_ptr<Advecti
   actor->SetMapper(this->mapper);
 
   this->ren->AddActor(actor);
+
+  this->callback = createSpawnPointCallback();
 }
 
 void LGlyphLayer::spoofPoints() {
@@ -199,10 +201,15 @@ void LGlyphLayer::updateData(int t) {
 }
 
 void LGlyphLayer::addObservers(vtkSmartPointer<vtkRenderWindowInteractor> interactor) {
-  auto newPointCallBack = createSpawnPointCallback();
-  interactor->AddObserver(vtkCommand::LeftButtonPressEvent, newPointCallBack);
-  interactor->AddObserver(vtkCommand::LeftButtonReleaseEvent, newPointCallBack);
-  interactor->AddObserver(vtkCommand::MouseMoveEvent, newPointCallBack);
+  interactor->AddObserver(vtkCommand::LeftButtonPressEvent, this->callback);
+  interactor->AddObserver(vtkCommand::LeftButtonReleaseEvent, this->callback);
+  interactor->AddObserver(vtkCommand::MouseMoveEvent, this->callback);
+}
+
+void LGlyphLayer::removeObservers(vtkSmartPointer<vtkRenderWindowInteractor> interactor) {
+  interactor->RemoveObserver(this->callback);
+  interactor->RemoveObserver(this->callback);
+  interactor->RemoveObserver(this->callback);
 }
 
 

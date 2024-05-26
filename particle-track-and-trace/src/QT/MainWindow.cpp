@@ -18,36 +18,59 @@
 using namespace std;
 
 MainWindow::MainWindow(QWidget* parent)
-    : QMainWindow(parent)
-    , ui(new Ui::MainWindow)
+  : QMainWindow(parent)
+  , ui(new Ui::MainWindow)
 {
-    ui->setupUi(this);
-
-  cout << "Reading data..." << endl;
-  string dataPath = "../../../../data";
-  shared_ptr<UVGrid> uvGrid = make_shared<UVGrid>(dataPath);
-  auto kernelRK4 = make_unique<RK4AdvectionKernel>(uvGrid);
-  auto kernelRK4BoundaryChecked = make_unique<SnapBoundaryConditionKernel>(std::move(kernelRK4), uvGrid);
-  cout << "Starting vtk..." << endl;
-
-  auto l = new LGlyphLayer(uvGrid, std::move(kernelRK4BoundaryChecked));
-  // l->spoofPoints();
-  l->setDt(3600);
-  // TODO: implement feature to call this function on widget
-  // l->cycleGlyphStyle();
-
-  Program *program = this->ui->program;
-  program->addLayer(new BackgroundImage(dataPath + "/map_qgis_1035.png"));
-  // TODO: implement feature to cycle between layers thru QT
-  program->addLayer(new EGlyphLayer(uvGrid));
-  program->addLayer(new EColLayer(uvGrid));
-  program->addLayer(l);
-
-  program->setupInteractions();
+  ui->setupUi(this);
+  this->setupTechniques();
 }
 
 MainWindow::~MainWindow() { 
   delete ui; 
+}
+
+
+void MainWindow::setupTechniques() {
+  cout << "Reading data..." << endl;
+  string dataPath = "../../../../data";
+  shared_ptr<UVGrid> uvGrid = make_shared<UVGrid>(dataPath);
+
+  // initialize techniques
+  Program *program = this->ui->program;
+  auto technique1 = new Technique(program->getCamera());
+  auto technique2 = new Technique(program->getCamera());
+  
+  // add bg layer
+  auto bg = new BackgroundImage(dataPath + "/map_qgis_1035.png");
+  technique1->addLayer(bg);
+  technique2->addLayer(bg);
+
+  // add Euler layers
+  technique1->addLayer(new EColLayer(uvGrid));
+  technique2->addLayer(new EGlyphLayer(uvGrid));
+
+  // setup LGlyphLayer
+  auto kernelRK4 = make_unique<RK4AdvectionKernel>(uvGrid);
+  auto kernelRK4BoundaryChecked = make_unique<SnapBoundaryConditionKernel>(std::move(kernelRK4), uvGrid);
+  auto lGlyph = new LGlyphLayer(uvGrid, std::move(kernelRK4BoundaryChecked));
+  lGlyph->setDt(3600);
+
+  technique1->addLayer(lGlyph);
+  // technique2->addLayer(new LColLayer(uvGrid)); // TODO: add LColLayer 
+  technique2->addLayer(lGlyph);
+
+  cout << technique1->numberOfLayers() << endl;
+
+  program->addTechnique(technique1);
+  program->addTechnique(technique2);
+
+  program->setActiveTechnique(0);
+
+  // TODO: implement feature to call this function on widget
+  // l->spoofPoints();
+  // l->cycleGlyphStyle();
+  
+
 }
 
 

@@ -2,17 +2,18 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include "../advection/UVGrid.h"
 
 namespace Ui {
 class MainWindow;
 }
 
 class MainWindow : public QMainWindow {
-    Q_OBJECT
+  Q_OBJECT
 
 public:
-    explicit MainWindow(QWidget* parent = 0);
-    ~MainWindow();
+  explicit MainWindow(QWidget* parent = 0);
+  ~MainWindow();
 
 private slots:
   void on_FirstButton_clicked(bool checked);
@@ -31,7 +32,9 @@ private slots:
   void on_IregularlySubsampledButton_clicked(bool checked);
 
 private:
-    Ui::MainWindow* ui;
+  Ui::MainWindow* ui;
+
+  void setupTechniques();
 };
 
 #endif

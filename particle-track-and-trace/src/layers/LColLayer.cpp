@@ -173,6 +173,10 @@ void LGlyphLayer::addObservers(vtkSmartPointer<vtkRenderWindowInteractor> intera
   interactor->AddObserver(vtkCommand::MouseMoveEvent, newPointCallBack);
 }
 
+void LGlyphLayer::removeObservers(vtkSmartPointer<vtkRenderWindowInteractor> interactor) {
+  // todo: logic for these
+}
+
 
 void LGlyphLayer::setDt(int dt) {
   this->dt = dt;
