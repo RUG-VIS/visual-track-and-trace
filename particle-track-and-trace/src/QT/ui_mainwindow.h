@@ -55,10 +55,6 @@ public:
     QRadioButton *IregularlySubsampledButton;
     Program *program;
 
-    Program* getProgram() {
-      return program;
-    }
-
     void setupUi(QMainWindow *MainWindow)
     {
         if (MainWindow->objectName().isEmpty())

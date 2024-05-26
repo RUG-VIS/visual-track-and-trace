@@ -36,7 +36,7 @@ MainWindow::MainWindow(QWidget* parent)
   // TODO: implement feature to call this function on widget
   // l->cycleGlyphStyle();
 
-  Program *program = this->ui->getProgram();
+  Program *program = this->ui->program;
   program->addLayer(new BackgroundImage(dataPath + "/map_qgis_1035.png"));
   // TODO: implement feature to cycle between layers thru QT
   program->addLayer(new EGlyphLayer(uvGrid));
@@ -51,15 +51,21 @@ MainWindow::~MainWindow() {
 }
 
 
+/* --------------------------------------------------------------------
+ * +                    QTWidget callbacks                            +
+ * --------------------------------------------------------------------*/
+
+
 void MainWindow::on_FirstButton_clicked(bool checked) {
   if (checked) {
-
+    cout << "clicked button 1!" << endl;
   }
 }
 
 
 void MainWindow::on_SecondButton_clicked(bool checked) {
   if (checked) {
+    cout << "clicked button 2!" << endl;
 
   }
 }
