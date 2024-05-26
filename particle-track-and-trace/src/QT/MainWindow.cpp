@@ -81,15 +81,14 @@ void MainWindow::setupTechniques() {
 
 void MainWindow::on_FirstButton_clicked(bool checked) {
   if (checked) {
-    cout << "clicked button 1!" << endl;
+    ui->program->setActiveTechnique(0);
   }
 }
 
 
 void MainWindow::on_SecondButton_clicked(bool checked) {
   if (checked) {
-    cout << "clicked button 2!" << endl;
-
+    ui->program->setActiveTechnique(1);
   }
 }
 
