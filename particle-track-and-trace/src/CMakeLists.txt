@@ -5,7 +5,13 @@ project(ParticleTrackTrace)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+set(CMAKE_AUTOMOC ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+find_package(Qt5Core REQUIRED)
+find_package(Qt5Gui REQUIRED)
+find_package(Qt5Widgets REQUIRED)
+find_package(Qt5OpenGL REQUIRED)
 
 find_package(VTK COMPONENTS
   GeovisCore
@@ -48,8 +54,6 @@ add_executable(ParticleTrackTrace MACOSX_BUNDLE main.cpp
         layers/Layer.h
         layers/LGlyphLayer.cpp
         layers/LGlyphLayer.h
-        layers/LColLayer.cpp
-        layers/LColLayer.h
         Program.cpp
         Program.h
         commands/TimerCallbackCommand.h
@@ -74,6 +78,10 @@ add_executable(ParticleTrackTrace MACOSX_BUNDLE main.cpp
         advection/Vel.h
         advection/kernel/SnapBoundaryConditionKernel.h
         advection/kernel/SnapBoundaryConditionKernel.cpp
+        QT/MainWindow.h
+        QT/MainWindow.cpp
+        QT/MainWindow.ui
+        QT/ui_mainwindow.h
 )
 
 execute_process(
@@ -94,7 +102,7 @@ find_library(NETCDF_LIB NAMES netcdf-cxx4 netcdf_c++4 PATHS ${NETCDFCXX_LIB_DIR}
 
 # Prevent a "command line is too long" failure in Windows.
 set(CMAKE_NINJA_FORCE_RESPONSE_FILE "ON" CACHE BOOL "Force Ninja to use response files.")
-target_link_libraries(ParticleTrackTrace ${NETCDF_LIB} ${VTK_LIBRARIES})
+target_link_libraries(ParticleTrackTrace ${NETCDF_LIB} ${VTK_LIBRARIES} Qt5::Widgets Qt5::OpenGL VTK::GUISupportQt VTK::IOLegacy)
 
 # vtk_module_autoinit is needed
 vtk_module_autoinit(
