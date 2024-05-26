@@ -118,3 +118,8 @@ Program::~Program() {
 vtkSmartPointer<vtkCamera> Program::getCamera() {
   return this->cam;
 }
+
+
+std::vector<Technique *> Program::getTechniques() {
+  return this->techniques;
+}

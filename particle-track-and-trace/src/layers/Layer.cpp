@@ -9,18 +9,16 @@ vtkSmartPointer<vtkRenderer> Layer::getLayer() {
   return this->ren;
 }
 
-void Layer::updateData(int t) {
-  // By default, do nothing
-}
-
-void Layer::addObservers(vtkSmartPointer<vtkRenderWindowInteractor> interactor) {
-    // By default, do nothing
-}
-
-void Layer::removeObservers(vtkSmartPointer<vtkRenderWindowInteractor> interactor) {
-    // By default, do nothing
-}
-
 void Layer::setCamera(vtkSmartPointer<vtkCamera> cam) {
   this->getLayer()->SetActiveCamera(cam.GetPointer());
 }
+
+
+void Layer::updateData(int t) {}
+void Layer::addObservers(vtkSmartPointer<vtkRenderWindowInteractor> interactor) {}
+void Layer::removeObservers(vtkSmartPointer<vtkRenderWindowInteractor> interactor) {}
+void Layer::setColorMode(ColourMode mode) {}
+void Layer::setSaturationMode(SaturationMode mode) {}
+void Layer::setGlyphStyle(GlyphStyle style) {}
+void Layer::setSamplingMode(SamplingMode mode) {}
+

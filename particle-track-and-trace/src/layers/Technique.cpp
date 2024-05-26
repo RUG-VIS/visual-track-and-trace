@@ -48,3 +48,31 @@ void Technique::unbind(vtkSmartPointer<vtkRenderWindow> win, vtkSmartPointer<vtk
   }
   win->SetNumberOfLayers(0);
 }
+
+
+void Technique::setColorMode(ColourMode mode) {
+  for (Layer *l : this->layers) {
+    l->setColorMode(mode);
+  }
+}
+
+
+void Technique::setSaturationMode(SaturationMode mode) {
+  for (Layer *l : this->layers) {
+    l->setSaturationMode(mode);
+  }
+}
+
+
+void Technique::setGlyphStyle(GlyphStyle style) {
+  for (Layer *l : this->layers) {
+    l->setGlyphStyle(style);
+  }
+}
+
+
+void Technique::setSamplingMode(SamplingMode mode) {
+  for (Layer *l : this->layers) {
+    l->setSamplingMode(mode);
+  }
+}

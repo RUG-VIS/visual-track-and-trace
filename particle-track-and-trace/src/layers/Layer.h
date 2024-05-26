@@ -1,6 +1,7 @@
 #ifndef LAYER_H
 #define LAYER_H
 
+#include "enums.h"
 #include <vtkInteractorStyle.h>
 #include <vtkRenderer.h>
 
@@ -38,6 +39,12 @@ public:
     * Used to share one camera between multiple layers.
     */ 
   virtual void setCamera(vtkSmartPointer<vtkCamera> cam);
+
+
+  virtual void setColorMode(ColourMode mode);
+  virtual void setSaturationMode(SaturationMode mode);
+  virtual void setGlyphStyle(GlyphStyle style);
+  virtual void setSamplingMode(SamplingMode mode);
 };
 
 #endif

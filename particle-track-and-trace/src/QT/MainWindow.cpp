@@ -15,6 +15,8 @@
 #include "../advection/UVGrid.h"
 #include "../advection/kernel/RK4AdvectionKernel.h"
 #include "../advection/kernel/SnapBoundaryConditionKernel.h"
+#include "../layers/enums.h"
+
 using namespace std;
 
 MainWindow::MainWindow(QWidget* parent)
@@ -59,8 +61,6 @@ void MainWindow::setupTechniques() {
   // technique2->addLayer(new LColLayer(uvGrid)); // TODO: add LColLayer 
   technique2->addLayer(lGlyph);
 
-  cout << technique1->numberOfLayers() << endl;
-
   program->addTechnique(technique1);
   program->addTechnique(technique2);
 
@@ -81,98 +81,123 @@ void MainWindow::setupTechniques() {
 
 void MainWindow::on_FirstButton_clicked(bool checked) {
   if (checked) {
-    ui->program->setActiveTechnique(0);
+    ui->program->setActiveTechnique(COLGLYPH);
   }
 }
 
 
 void MainWindow::on_SecondButton_clicked(bool checked) {
   if (checked) {
-    ui->program->setActiveTechnique(1);
+    ui->program->setActiveTechnique(GLYPHCOL);
   }
 }
 
 
 void MainWindow::on_ComplementaryButton_clicked(bool checked) {
   if (checked) {
-
+    for (Technique *t : ui->program->getTechniques()) {
+      t->setColorMode(COMPLEMENTARY);
+    }
   }
 }
 
 
 void MainWindow::on_ContrastingButton_clicked(bool checked) {
   if (checked) {
-
+    for (Technique *t : ui->program->getTechniques()) {
+      t->setColorMode(CONTRASTING);
+    }
   }
 }
 
 
 void MainWindow::on_MonochromaticButton_clicked(bool checked) {
   if (checked) {
-
+    for (Technique *t : ui->program->getTechniques()) {
+      t->setColorMode(MONOCHROMATIC);
+    }
   }
 }
 
 
 void MainWindow::on_SaturateButton_clicked(bool checked) {
   if (checked) {
-
+    for (Technique *t : ui->program->getTechniques()) {
+      t->setSaturationMode(SATURATED);
+    }
   }
 }
 
 
 void MainWindow::on_DesaturateButton_clicked(bool checked) {
   if (checked) {
-
+    for (Technique *t : ui->program->getTechniques()) {
+      t->setSaturationMode(DESATURATED);
+    }
   }
 }
 
 
 void MainWindow::on_CircleButton_clicked(bool checked) {
   if (checked) {
-
+    for (Technique *t : ui->program->getTechniques()) {
+      t->setGlyphStyle(CIRCLE);
+    }
   }
 }
 
 
 void MainWindow::on_TriangleButton_clicked(bool checked) {
   if (checked) {
-
+    for (Technique *t : ui->program->getTechniques()) {
+      t->setGlyphStyle(TRIANGLE);
+    }
   }
 }
 
 
 void MainWindow::on_SquareButton_clicked(bool checked) {
   if (checked) {
-
+    for (Technique *t : ui->program->getTechniques()) {
+      t->setGlyphStyle(SQUARE);
+    }
   }
 }
 
 
 void MainWindow::on_HexagonButton_clicked(bool checked) {
   if (checked) {
-
+    for (Technique *t : ui->program->getTechniques()) {
+      t->setGlyphStyle(HEXAGON);
+    }
   }
 }
 
 
 void MainWindow::on_FullySampledButton_clicked(bool checked) {
   if (checked) {
-
+    for (Technique *t : ui->program->getTechniques()) {
+      t->setSamplingMode(FULLYSAMPLED);
+    }
   }
 }
 
 
 void MainWindow::on_RegularlySubsampledButton_clicked(bool checked) {
   if (checked) {
-
+    for (Technique *t : ui->program->getTechniques()) {
+      t->setSamplingMode(REGULARLYSUBSAMPLED);
+    }
   }
 }
 
 
 void MainWindow::on_IregularlySubsampledButton_clicked(bool checked) {
   if (checked) {
-
-  }}
+    for (Technique *t : ui->program->getTechniques()) {
+      t->setSamplingMode(IRREGULARLYSUBSAMPLED);
+    }
+  }
+}
 
 

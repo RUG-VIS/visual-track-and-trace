@@ -79,6 +79,8 @@ public:
 
   vtkSmartPointer<vtkCamera> getCamera();
 
+  std::vector<Technique *> getTechniques();
+
 };
 
 #endif
