@@ -22,7 +22,6 @@
 
 vtkSmartPointer<SpawnPointCallback> LGlyphLayer::createSpawnPointCallback() {
   vtkNew<SpawnPointCallback> newPointCallBack;
-  newPointCallBack->setData(this->data);
   newPointCallBack->setPoints(this->points);
   newPointCallBack->setRen(this->ren);
   newPointCallBack->setUVGrid(this->uvGrid);

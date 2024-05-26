@@ -54,6 +54,8 @@ add_executable(ParticleTrackTrace MACOSX_BUNDLE main.cpp
         layers/Layer.h
         layers/LGlyphLayer.cpp
         layers/LGlyphLayer.h
+        layers/LColLayer.cpp
+        layers/LColLayer.h
         layers/Technique.cpp
         layers/Technique.h
         layers/enums.h

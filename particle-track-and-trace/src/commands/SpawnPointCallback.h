@@ -19,8 +19,6 @@ public:
 
   void setPoints(const vtkSmartPointer<vtkPoints> &points);
 
-  void setData(const vtkSmartPointer<vtkPolyData> &data);
-
   void setRen(const vtkSmartPointer<vtkRenderer> &ren);
 
   void setBeached(const vtkSmartPointer<vtkIntArray> &parts);
@@ -30,7 +28,6 @@ public:
   void setUVGrid(const std::shared_ptr<UVGrid> &uvGrid);
 
 private:
-  vtkSmartPointer<vtkPolyData> data;
   vtkSmartPointer<vtkPoints> points;
   vtkSmartPointer<vtkRenderer> ren;
   vtkSmartPointer<vtkIntArray> particlesBeached;

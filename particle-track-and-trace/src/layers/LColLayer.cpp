@@ -1,4 +1,4 @@
-#include "LGlyphLayer.h"
+#include "LColLayer.h"
 #include "../commands/SpawnPointCallback.h"
 #include <vtkActor2D.h>
 #include <vtkGlyph2D.h>
@@ -20,9 +20,8 @@
 
 #include "../CartographicTransformation.h"
 
-vtkSmartPointer<SpawnPointCallback> LGlyphLayer::createSpawnPointCallback() {
-  auto newPointCallBack = vtkSmartPointer<SpawnPointCallback>::New();
-  newPointCallBack->setData(this->data);
+vtkSmartPointer<SpawnPointCallback> LColLayer::createSpawnPointCallback() {
+  vtkNew<SpawnPointCallback> newPointCallBack;
   newPointCallBack->setPoints(this->points);
   newPointCallBack->setRen(this->ren);
   newPointCallBack->setUVGrid(this->uvGrid);
@@ -57,7 +56,7 @@ vtkSmartPointer<vtkLookupTable> buildLut(int n) {
   return lut;
 }
 
-LGlyphLayer::LGlyphLayer(std::shared_ptr<UVGrid> uvGrid, std::unique_ptr<AdvectionKernel> advectionKernel) {
+LColLayer::LColLayer(std::shared_ptr<UVGrid> uvGrid, std::unique_ptr<AdvectionKernel> advectionKernel) {
   this->ren = vtkSmartPointer<vtkRenderer>::New();
   this->ren->SetLayer(2);
 
@@ -105,9 +104,10 @@ LGlyphLayer::LGlyphLayer(std::shared_ptr<UVGrid> uvGrid, std::unique_ptr<Advecti
   actor->SetMapper(mapper);
 
   this->ren->AddActor(actor);
+  this->callback = createSpawnPointCallback();
 }
 
-void LGlyphLayer::spoofPoints() {
+void LColLayer::spoofPoints() {
   for (int i=0; i < 330; i+=5) {
     for (int j=0; j < 330; j+=5) {
       this->points->InsertNextPoint(-15.875+(12.875+15.875)/330*j, 46.125+(62.625-46.125)/330*i, 0);
@@ -118,7 +118,7 @@ void LGlyphLayer::spoofPoints() {
   this->points->Modified();
 }
 
-void LGlyphLayer::updateData(int t) {
+void LColLayer::updateData(int t) {
   const int SUPERSAMPLINGRATE = 4;
   double point[3], oldX, oldY;
   bool modifiedData = false;
@@ -166,18 +166,19 @@ void LGlyphLayer::updateData(int t) {
   }
 }
 
-void LGlyphLayer::addObservers(vtkSmartPointer<vtkRenderWindowInteractor> interactor) {
-  auto newPointCallBack = createSpawnPointCallback();
-  interactor->AddObserver(vtkCommand::LeftButtonPressEvent, newPointCallBack);
-  interactor->AddObserver(vtkCommand::LeftButtonReleaseEvent, newPointCallBack);
-  interactor->AddObserver(vtkCommand::MouseMoveEvent, newPointCallBack);
+void LColLayer::addObservers(vtkSmartPointer<vtkRenderWindowInteractor> interactor) {
+  interactor->AddObserver(vtkCommand::LeftButtonPressEvent, this->callback);
+  interactor->AddObserver(vtkCommand::LeftButtonReleaseEvent, this->callback);
+  interactor->AddObserver(vtkCommand::MouseMoveEvent, this->callback);
 }
 
-void LGlyphLayer::removeObservers(vtkSmartPointer<vtkRenderWindowInteractor> interactor) {
-  // todo: logic for these
+void LColLayer::removeObservers(vtkSmartPointer<vtkRenderWindowInteractor> interactor) {
+  interactor->RemoveObserver(this->callback);
+  interactor->RemoveObserver(this->callback);
+  interactor->RemoveObserver(this->callback);
 }
 
 
-void LGlyphLayer::setDt(int dt) {
+void LColLayer::setDt(int dt) {
   this->dt = dt;
 }

@@ -51,17 +51,12 @@ void SpawnPointCallback::Execute(vtkObject *caller, unsigned long evId, void *ca
 }
 
 
-SpawnPointCallback::SpawnPointCallback() : data(nullptr),
-                                           points(nullptr),
+SpawnPointCallback::SpawnPointCallback() : points(nullptr),
                                            inverseCartographicProjection(nullptr),
                                            uvGrid(nullptr) { }
 
 SpawnPointCallback *SpawnPointCallback::New() {
   return new SpawnPointCallback;
-}
-
-void SpawnPointCallback::setData(const vtkSmartPointer<vtkPolyData> &data) {
-  this->data = data;
 }
 
 void SpawnPointCallback::setPoints(const vtkSmartPointer<vtkPoints> &points) {

@@ -11,6 +11,7 @@
 #include "../layers/EColLayer.h"
 #include "../layers/EGlyphLayer.h"
 #include "../layers/LGlyphLayer.h"
+#include "../layers/LColLayer.h"
 #include "../Program.h"
 #include "../advection/UVGrid.h"
 #include "../advection/kernel/RK4AdvectionKernel.h"
@@ -55,11 +56,16 @@ void MainWindow::setupTechniques() {
   auto kernelRK4 = make_unique<RK4AdvectionKernel>(uvGrid);
   auto kernelRK4BoundaryChecked = make_unique<SnapBoundaryConditionKernel>(std::move(kernelRK4), uvGrid);
   auto lGlyph = new LGlyphLayer(uvGrid, std::move(kernelRK4BoundaryChecked));
+
+  auto kernelRK4_2 = make_unique<RK4AdvectionKernel>(uvGrid);
+  auto kernelRK4BoundaryChecked_2 = make_unique<SnapBoundaryConditionKernel>(std::move(kernelRK4_2), uvGrid);
+  auto lCol = new LColLayer(uvGrid, std::move(kernelRK4BoundaryChecked_2));
   lGlyph->setDt(3600);
+  lCol->setDt(3600);
 
   technique1->addLayer(lGlyph);
-  // technique2->addLayer(new LColLayer(uvGrid)); // TODO: add LColLayer 
-  technique2->addLayer(lGlyph);
+  technique2->addLayer(lCol); 
+  // technique2->addLayer(lGlyph);
 
   program->addTechnique(technique1);
   program->addTechnique(technique2);
@@ -69,8 +75,6 @@ void MainWindow::setupTechniques() {
   // TODO: implement feature to call this function on widget
   // l->spoofPoints();
   // l->cycleGlyphStyle();
-  
-
 }
 
 
