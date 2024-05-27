@@ -255,7 +255,7 @@ public:
         MonochromaticButton->setText(QCoreApplication::translate("MainWindow", "Monochromatic", nullptr));
         SaturationBox->setTitle(QCoreApplication::translate("MainWindow", "Saturation", nullptr));
         SaturateButton->setText(QCoreApplication::translate("MainWindow", "Fully saturated", nullptr));
-        DesaturateButton->setText(QCoreApplication::translate("MainWindow", "Desaturated", nullptr));
+        DesaturateButton->setText(QCoreApplication::translate("MainWindow", "Gradually saturated", nullptr));
         GlyphBox->setTitle(QCoreApplication::translate("MainWindow", "Glyph Shape", nullptr));
         CircleButton->setText(QCoreApplication::translate("MainWindow", "Circle", nullptr));
         TriangleButton->setText(QCoreApplication::translate("MainWindow", "Triangle", nullptr));

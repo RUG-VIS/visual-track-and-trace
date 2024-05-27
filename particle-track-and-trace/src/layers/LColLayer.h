@@ -25,6 +25,9 @@ private:
   int numLats;
   int numLons;
 
+
+  int calcIndex(double x, double y);
+
 public:
   /** Constructor.
     */

@@ -65,7 +65,6 @@ void MainWindow::setupTechniques() {
 
   technique1->addLayer(lGlyph);
   technique2->addLayer(lCol); 
-  // technique2->addLayer(lGlyph);
 
   program->addTechnique(technique1);
   program->addTechnique(technique2);

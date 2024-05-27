@@ -35,8 +35,8 @@ EColLayer::EColLayer(std::shared_ptr<UVGrid> uvGrid) {
   this->ren->InteractiveOff();
 
   this->uvGrid = uvGrid;
-  this->numLats = uvGrid->lats.size();
-  this->numLons = uvGrid->lons.size();
+  this->numLats = uvGrid->latSize;
+  this->numLons = uvGrid->lonSize;
 
   this->strength = vtkSmartPointer<vtkDoubleArray>::New();
   this->strength->SetName("strength");
@@ -121,12 +121,6 @@ void EColLayer::readCoordinates() {
         l->SetId(1, idx-numLats-1);
         l->SetId(2, idx-numLats);
         l->SetId(3, idx);
-
-        double coords[12];
-        points->GetPoint(idx-1, coords);
-        points->GetPoint(idx-numLats-1, coords+3);
-        points->GetPoint(idx-numLats, coords+6);
-        points->GetPoint(idx, coords+9);
         data->InsertNextCell(VTK_QUAD, l);
 
         // ltake the average of the four surrounding points as the cell's velocity.

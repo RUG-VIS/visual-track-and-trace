@@ -68,10 +68,10 @@ vtkSmartPointer<vtkLookupTable> buildLutOpacity(int n) {
   lut->SetScaleToLinear();
   lut->Build();
   for (int i=0; i < n; i++) {
-    lut->SetTableValue(i, 1, 1, 1, 1-(0.75*i/(n-1)));
+    lut->SetTableValue(i, 1, 0, 1, 1-(0.75*i/(n-1)));
   }
   lut->UseAboveRangeColorOn();
-  lut->SetAboveRangeColor(1,1,1,0.20);
+  lut->SetAboveRangeColor(1,0,1,0.20);
   
   // We cheat a little here: any particle with an age of -1 is out of bounds, and thus set invisible.
   lut->UseBelowRangeColorOn();

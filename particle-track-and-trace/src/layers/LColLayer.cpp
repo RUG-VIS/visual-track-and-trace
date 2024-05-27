@@ -31,39 +31,46 @@ vtkSmartPointer<SpawnPointCallback> LColLayer::createSpawnPointCallback() {
   return newPointCallBack;
 }
 
-// Further notes; current thinking is to allow tracking a particle's age by using a scalar array in the VtkPolyData. This would be incremented for every tick/updateData function call.
 
 /**
- * Build and returns a vtkLookupTable for the given number of colours in grayscale.
- * @param n : number of colours to add to the SetTableRange
- * @return : a vtkLookupTable with grayscale colours from [1,1,1,1] to [1,1,1,0.25] in n steps.
  */
-vtkSmartPointer<vtkLookupTable> buildLut(int n) {
+// TODO: edit this function; probably extract all lut builders into a builder pattern or something.
+vtkSmartPointer<vtkLookupTable> buildLutDens() {
+  int n = 5;
   vtkNew<vtkLookupTable> lut;
   lut->SetNumberOfColors(n);
-  lut->SetTableRange(0, n);
+  lut->SetTableRange(1, n+1);
   lut->SetScaleToLinear();
   lut->Build();
-  for (int i=0; i < n; i++) {
-    lut->SetTableValue(i, 1, 1, 1, 1-(0.75*i/(n-1)));
+  for (int i=n-1; i >= 0; i--) {
+    lut->SetTableValue(i, 0, 1-(0.75*i/(n-1)), 1, 1);
   }
   lut->UseAboveRangeColorOn();
-  lut->SetAboveRangeColor(1,1,1,0.20);
+  lut->SetAboveRangeColor(1,0,0,1);
   
-  // We cheat a little here: any particle with an age of -1 is out of bounds, and thus set invisible.
   lut->UseBelowRangeColorOn();
   lut->SetBelowRangeColor(1,1,1,0);
 
   return lut;
+
 }
 
+// There's two separate pipelines going on here: the one where we build a vtkPoints array for the spawnpointcallback,
+// and the one where we build a vtkPolyData with Cells for the colour map.
+// TODO: it would make sense to separate these pipelines out to their own functions.
 LColLayer::LColLayer(std::shared_ptr<UVGrid> uvGrid, std::unique_ptr<AdvectionKernel> advectionKernel) {
+  // general management; probably should be the actual constructor.
   this->ren = vtkSmartPointer<vtkRenderer>::New();
   this->ren->SetLayer(2);
 
+  this->uvGrid = uvGrid;
+  this->numLats = uvGrid->latSize;
+  this->numLons = uvGrid->lonSize;
+  this->advector = std::move(advectionKernel);
+
+
+  // pipeline 1
   this->points = vtkSmartPointer<vtkPoints>::New();
-  vtkNew<vtkPolyData> data;
-  data->SetPoints(this->points);
 
   this->particlesBeached = vtkSmartPointer<vtkIntArray>::New();
   this->particlesBeached->SetName("particlesBeached");
@@ -73,30 +80,70 @@ LColLayer::LColLayer(std::shared_ptr<UVGrid> uvGrid, std::unique_ptr<AdvectionKe
   this->particlesAge->SetName("particlesAge");
   this->particlesAge->SetNumberOfComponents(1);
 
-  this->uvGrid = uvGrid;
-  this->numLats = uvGrid->lats.size();
-  this->numLons = uvGrid->lons.size();
+
+  // pipeline 2
+  this->data = vtkSmartPointer<vtkPolyData>::New();
+  vtkNew<vtkPoints> cellPoints;
+  cellPoints->Allocate(numLats*numLons);
+  this->data->SetPoints(cellPoints);
+  data->Allocate((numLats-1)*(numLons-1));
+
   this->cellParticleDensity = vtkSmartPointer<vtkIntArray>::New();
   this->cellParticleDensity->SetName("cellParticleDensity");
   this->cellParticleDensity->SetNumberOfComponents(1);
   this->cellParticleDensity->SetNumberOfTuples((numLats-1)*(numLons-1));
   
-  data->GetPointData()->AddArray(this->particlesBeached);
-  data->GetPointData()->AddArray(this->particlesAge);
-  data->GetCellData()->AddArray(this->cellParticleDensity);
-  data->GetPointData()->SetActiveScalars("particlesAge");
-  data->GetCellData()->SetActiveScalars("cellParticleDensity");
-
-  advector = std::move(advectionKernel);
-  this->uvGrid = uvGrid;
+  this->data->GetCellData()->AddArray(this->cellParticleDensity);
+  this->data->GetCellData()->SetActiveScalars("cellParticleDensity");
 
   vtkSmartPointer<vtkTransformFilter> transformFilter = createCartographicTransformFilter(uvGrid);
-  transformFilter->SetInputData(data);
+  auto transform = transformFilter->GetTransform();
+
+  int cellId = 0, pointId = 0;
+  int latIndex = 0, lonIndex = 0;
+  for (auto lon : uvGrid->lons) {
+    latIndex = 0;
+    for (auto lat : uvGrid->lats) {
+      double out[3] = {lon, lat, 0};
+      transform->TransformPoint(out, out);
+      cellPoints->InsertPoint(pointId++, out[0], out[1], 0);
+      
+      // logic for adding cells
+      if (latIndex > 0 and lonIndex > 0 ) {
+        int idx = latIndex+lonIndex*numLats;
+        vtkNew<vtkIdList> l;
+        l->SetNumberOfIds(4);
+        l->SetId(0, idx-1);
+        l->SetId(1, idx-numLats-1);
+        l->SetId(2, idx-numLats);
+        l->SetId(3, idx);
+
+        this->data->InsertNextCell(VTK_QUAD, l);
+        this->cellParticleDensity->SetTuple1(cellId++, 0);
+      }
+      latIndex++;
+    }
+    lonIndex++;
+  }
+
+  vtkNew<vtkPolyDataMapper>(mapper);
+  mapper->SetInputData(data);
+  mapper->SetLookupTable(buildLutDens());
+  mapper->UseLookupTableScalarRangeOn();
+  mapper->Update();
 
   vtkNew<vtkActor> actor;
   actor->SetMapper(mapper);
+  actor->GetProperty()->SetColor(0, 1, 0);
+  actor->GetProperty()->SetOpacity(0.5);
+
+  // vtkNew<vtkActor> act2;
+  // act2->SetMapper(mapper);
+  // act2->GetProperty()->SetRepresentationToWireframe();
+  // this->ren->AddActor(act2);
 
   this->ren->AddActor(actor);
+
   this->callback = createSpawnPointCallback();
 }
 
@@ -111,10 +158,31 @@ void LColLayer::spoofPoints() {
   this->points->Modified();
 }
 
+// calculates the cellIndex for a given lat,lon pair.
+int LColLayer::calcIndex(double x, double y) {
+  int lonIndex = std::floor((x - uvGrid->lonMin()) / uvGrid->lonStep());
+  int latIndex = std::floor((y - uvGrid->latMin()) / uvGrid->latStep());
+
+  return latIndex+lonIndex*(uvGrid->latSize-1);
+}
+
+
+void printArray(vtkSmartPointer<vtkIntArray> data, int numLons, int numLats, int latsize) {
+  for (int i=0; i < numLons-1; i++) {
+    for (int j=0; j < numLats-1; j++) {
+      int value = data->GetValue(j+i*latsize);
+      if (value > 1)
+        cout << "(" << i << ", " << j << ") ("<< j+i*latsize << "): " << value << endl;
+    }
+  }
+  cout << endl;
+}
+
 void LColLayer::updateData(int t) {
   const int SUPERSAMPLINGRATE = 4;
   double point[3], oldX, oldY;
   bool modifiedData = false;
+  this->cellParticleDensity->Fill(0);
 
   // iterate over every point.
   for (vtkIdType n=0; n < this->points->GetNumberOfPoints(); n++) {
@@ -152,11 +220,16 @@ void LColLayer::updateData(int t) {
         modifiedData = true;
       }
     }
+    // add point to cellparticleDensity
+    int index = calcIndex(point[0], point[1]);
+    this->cellParticleDensity->SetValue(index, cellParticleDensity->GetValue(index)+1);
   }
   if (modifiedData) {
     this->particlesAge->Modified();
     this->points->Modified();
+    this->cellParticleDensity->Modified();
   }
+  // printArray(this->cellParticleDensity, numLons, numLats, uvGrid->latSize-1);
 }
 
 void LColLayer::addObservers(vtkSmartPointer<vtkRenderWindowInteractor> interactor) {

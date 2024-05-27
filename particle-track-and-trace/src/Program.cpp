@@ -107,6 +107,7 @@ void Program::setActiveTechnique(int idx) {
   this->techniques[idx]->bind(this->win, this->interact);
   
   this->activeIdx = idx;
+  this->win->Render();
 }
 
 
