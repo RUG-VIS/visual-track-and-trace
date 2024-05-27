@@ -1,6 +1,7 @@
 #include "LColLayer.h"
 #include "../commands/SpawnPointCallback.h"
 #include <vtkActor2D.h>
+#include <vtkCellData.h>
 #include <vtkGlyph2D.h>
 #include <vtkLookupTable.h>
 #include <vtkGlyphSource2D.h>
@@ -66,15 +67,25 @@ LColLayer::LColLayer(std::shared_ptr<UVGrid> uvGrid, std::unique_ptr<AdvectionKe
 
   this->particlesBeached = vtkSmartPointer<vtkIntArray>::New();
   this->particlesBeached->SetName("particlesBeached");
-  this->particlesBeached->SetNumberOfComponents(0);
+  this->particlesBeached->SetNumberOfComponents(1);
 
   this->particlesAge = vtkSmartPointer<vtkIntArray>::New();
   this->particlesAge->SetName("particlesAge");
-  this->particlesAge->SetNumberOfComponents(0);
+  this->particlesAge->SetNumberOfComponents(1);
 
+  this->uvGrid = uvGrid;
+  this->numLats = uvGrid->lats.size();
+  this->numLons = uvGrid->lons.size();
+  this->cellParticleDensity = vtkSmartPointer<vtkIntArray>::New();
+  this->cellParticleDensity->SetName("cellParticleDensity");
+  this->cellParticleDensity->SetNumberOfComponents(1);
+  this->cellParticleDensity->SetNumberOfTuples((numLats-1)*(numLons-1));
+  
   data->GetPointData()->AddArray(this->particlesBeached);
   data->GetPointData()->AddArray(this->particlesAge);
+  data->GetCellData()->AddArray(this->cellParticleDensity);
   data->GetPointData()->SetActiveScalars("particlesAge");
+  data->GetCellData()->SetActiveScalars("cellParticleDensity");
 
   advector = std::move(advectionKernel);
   this->uvGrid = uvGrid;
@@ -82,24 +93,6 @@ LColLayer::LColLayer(std::shared_ptr<UVGrid> uvGrid, std::unique_ptr<AdvectionKe
   vtkSmartPointer<vtkTransformFilter> transformFilter = createCartographicTransformFilter(uvGrid);
   transformFilter->SetInputData(data);
 
-  vtkNew<vtkGlyphSource2D> circleSource;
-  circleSource->SetGlyphTypeToCircle();
-  circleSource->SetScale(0.02);
-  circleSource->Update();
-
-  vtkNew<vtkGlyph2D> glyph2D;
-  glyph2D->SetSourceConnection(circleSource->GetOutputPort());
-  glyph2D->SetInputConnection(transformFilter->GetOutputPort());
-  glyph2D->SetScaleModeToDataScalingOff();
-  glyph2D->Update();
-
-  vtkNew<vtkPolyDataMapper> mapper;
-  mapper->SetInputConnection(glyph2D->GetOutputPort());
-  mapper->SetColorModeToMapScalars();
-  mapper->SetLookupTable(buildLut(512));
-  mapper->UseLookupTableScalarRangeOn();
-  mapper->Update();
-  
   vtkNew<vtkActor> actor;
   actor->SetMapper(mapper);
 

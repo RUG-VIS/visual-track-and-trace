@@ -16,11 +16,14 @@ private:
   vtkSmartPointer<vtkPolyData> data;
   vtkSmartPointer<vtkIntArray> particlesBeached;
   vtkSmartPointer<vtkIntArray> particlesAge;
+  vtkSmartPointer<vtkIntArray> cellParticleDensity;
   vtkSmartPointer<SpawnPointCallback> callback;
   std::unique_ptr<AdvectionKernel> advector;
   std::shared_ptr<UVGrid> uvGrid;
   int dt = 3600;
   int beachedAtNumberOfTimes = 20;
+  int numLats;
+  int numLons;
 
 public:
   /** Constructor.
