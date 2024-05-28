@@ -75,9 +75,6 @@ void MainWindow::setupTechniques() {
 
   program->setActiveTechnique(COLGLYPH);
 
-  // TODO: implement feature to call this function on widget
-  // l->spoofPoints();
-
   // Setup timer
   auto intr = program->getInteractor();
   this->timer = vtkSmartPointer<TimerCallbackCommand>::New(program);
