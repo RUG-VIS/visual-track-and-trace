@@ -39,11 +39,6 @@ private:
     */ 
   void setWinProperties();
 
-  /** This function sets up and connects a TimerCallbackCommand with the program.
-    */ 
-  void setupTimer(int dt);
-
-
   /** This function sets up the camera's associated movement callbacks..
     */ 
   void setupCameraCallback();

@@ -38,15 +38,6 @@ void Program::setWinProperties() {
   this->interact->SetInteractorStyle(style);
 }
 
-void Program::setupTimer(int dt) {
-  auto callback = vtkSmartPointer<TimerCallbackCommand>::New(this);
-  callback->SetClientData(this);
-  callback->setDt(dt);
-  this->interact->AddObserver(vtkCommand::TimerEvent, callback);
-  this->interact->AddObserver(vtkCommand::KeyPressEvent, callback);
-  this->interact->CreateRepeatingTimer(17); // 60 fps == 1000 / 60 == 16.7 ms per frame
-}
-
 void Program::setupCameraCallback() {
   auto callback = vtkSmartPointer<CameraMoveCallback>::New(this->cam);
   this->interact->AddObserver(vtkCommand::MouseWheelForwardEvent, callback);
@@ -63,7 +54,6 @@ Program::Program(QWidget *parent): QVTKOpenGLNativeWidget(parent) {
 
   this->win->SetNumberOfLayers(0);
   setWinProperties();
-  setupTimer(60 * 60); // FIXME: manually tracking this variable is a little stupid.
   setupCameraCallback();
 }
 
