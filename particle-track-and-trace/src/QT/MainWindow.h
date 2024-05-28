@@ -26,7 +26,7 @@ private slots:
   void on_CircleButton_clicked(bool checked);
   void on_TriangleButton_clicked(bool checked);
   void on_SquareButton_clicked(bool checked);
-  void on_HexagonButton_clicked(bool checked);
+  void on_CrossButton_clicked(bool checked);
   void on_FullySampledButton_clicked(bool checked);
   void on_RegularlySubsampledButton_clicked(bool checked);
   void on_IregularlySubsampledButton_clicked(bool checked);

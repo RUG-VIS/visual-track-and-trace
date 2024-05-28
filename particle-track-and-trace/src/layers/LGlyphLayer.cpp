@@ -59,13 +59,13 @@ LGlyphLayer::LGlyphLayer(std::shared_ptr<UVGrid> uvGrid, std::unique_ptr<Advecti
   vtkSmartPointer<vtkTransformFilter> transformFilter = createCartographicTransformFilter(uvGrid);
   transformFilter->SetInputData(data);
 
-  vtkNew<vtkGlyphSource2D> circleSource;
-  circleSource->SetGlyphTypeToCircle();
-  circleSource->SetScale(0.02);
-  circleSource->Update();
+  this->glyphSource = vtkSmartPointer<vtkGlyphSource2D>::New();
+  this->glyphSource->SetGlyphTypeToCircle();
+  this->glyphSource->SetScale(0.02);
+  this->glyphSource->Update();
 
   vtkNew<vtkGlyph2D> glyph2D;
-  glyph2D->SetSourceConnection(circleSource->GetOutputPort());
+  glyph2D->SetSourceConnection(this->glyphSource->GetOutputPort());
   glyph2D->SetInputConnection(transformFilter->GetOutputPort());
   glyph2D->SetScaleModeToDataScalingOff();
   glyph2D->Update();
@@ -199,6 +199,23 @@ void LGlyphLayer::setSaturationMode(SaturationMode mode) {
     this->mapper->SetLookupTable(this->tables[mode]);
   } else {
     this->mapper->SetLookupTable(this->tables[this->activeColourMode]);
+  }
+}
+
+void LGlyphLayer::setGlyphStyle(GlyphStyle style) {
+  switch (style) {
+    case CIRCLE:
+      this->glyphSource->SetGlyphTypeToCircle();
+      break;
+    case SQUARE:
+      this->glyphSource->SetGlyphTypeToSquare();
+      break;
+    case TRIANGLE:
+      this->glyphSource->SetGlyphTypeToTriangle();
+      break;
+    case CROSS:
+      this->glyphSource->SetGlyphTypeToCross();
+      break;
   }
 }
 

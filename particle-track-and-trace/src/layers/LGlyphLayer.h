@@ -4,6 +4,7 @@
 #include "Layer.h"
 #include "../advection/kernel/AdvectionKernel.h"
 #include "../commands/SpawnPointCallback.h"
+#include <vtkGlyphSource2D.h>
 #include <vtkPolyData.h>
 #include <vtkInteractorStyle.h>
 
@@ -18,6 +19,7 @@ private:
   vtkSmartPointer<vtkIntArray> particlesAge;
   vtkSmartPointer<vtkIntArray> lutIdx;
   vtkSmartPointer<vtkPolyDataMapper> mapper;
+  vtkSmartPointer<vtkGlyphSource2D> glyphSource;
   std::unique_ptr<AdvectionKernel> advector;
   std::shared_ptr<UVGrid> uvGrid;
   int dt = 3600;
@@ -54,6 +56,7 @@ public:
 
   void setColourMode(ColourMode mode) override;
   void setSaturationMode(SaturationMode mode) override;
+  void setGlyphStyle(GlyphStyle style) override;
 
   /** 
    * Sets a custom DT value, needed for advect calls to the simulation logic.

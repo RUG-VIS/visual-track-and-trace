@@ -47,7 +47,7 @@ public:
     QRadioButton *CircleButton;
     QRadioButton *TriangleButton;
     QRadioButton *SquareButton;
-    QRadioButton *HexagonButton;
+    QRadioButton *CrossButton;
     QGroupBox *GlyphBox_2;
     QVBoxLayout *verticalLayout_16;
     QRadioButton *FullySampledButton;
@@ -188,10 +188,10 @@ public:
 
         verticalLayout_14->addWidget(SquareButton);
 
-        HexagonButton = new QRadioButton(GlyphBox);
-        HexagonButton->setObjectName(QString::fromUtf8("HexagonButton"));
+        CrossButton = new QRadioButton(GlyphBox);
+        CrossButton->setObjectName(QString::fromUtf8("CrossButton"));
 
-        verticalLayout_14->addWidget(HexagonButton);
+        verticalLayout_14->addWidget(CrossButton);
 
         GlyphBox_2 = new QGroupBox(ChannelBox);
         GlyphBox_2->setObjectName(QString::fromUtf8("GlyphBox_2"));
@@ -260,11 +260,11 @@ public:
         CircleButton->setText(QCoreApplication::translate("MainWindow", "Circle", nullptr));
         TriangleButton->setText(QCoreApplication::translate("MainWindow", "Triangle", nullptr));
         SquareButton->setText(QCoreApplication::translate("MainWindow", "Square", nullptr));
-        HexagonButton->setText(QCoreApplication::translate("MainWindow", "Hexagon", nullptr));
+        CrossButton->setText(QCoreApplication::translate("MainWindow", "Cross", nullptr));
         GlyphBox_2->setTitle(QCoreApplication::translate("MainWindow", "Glyph count", nullptr));
         FullySampledButton->setText(QCoreApplication::translate("MainWindow", "Fully sampled", nullptr));
         RegularlySubsampledButton->setText(QCoreApplication::translate("MainWindow", "Regularly subsampled", nullptr));
-        IregularlySubsampledButton->setText(QCoreApplication::translate("MainWindow", "Irregularly sampled", nullptr));
+        IregularlySubsampledButton->setText(QCoreApplication::translate("MainWindow", "Irregularly subsampled", nullptr));
     } // retranslateUi
 
 };

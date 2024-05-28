@@ -25,7 +25,7 @@ enum GlyphStyle {
   CIRCLE = 0,
   TRIANGLE = 1,
   SQUARE = 2,
-  HEXAGON = 3,
+  CROSS = 3,
 };
 
 enum SamplingMode {

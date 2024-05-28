@@ -178,10 +178,10 @@ void MainWindow::on_SquareButton_clicked(bool checked) {
 }
 
 
-void MainWindow::on_HexagonButton_clicked(bool checked) {
+void MainWindow::on_CrossButton_clicked(bool checked) {
   if (checked) {
     for (Technique *t : ui->program->getTechniques()) {
-      t->setGlyphStyle(HEXAGON);
+      t->setGlyphStyle(CROSS);
     }
     ui->program->requestRender();
   }
