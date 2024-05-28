@@ -32,6 +32,7 @@ private slots:
   void on_FullySampledButton_clicked(bool checked);
   void on_RegularlySubsampledButton_clicked(bool checked);
   void on_IregularlySubsampledButton_clicked(bool checked);
+  void on_pauseButton_clicked(bool checked);
 
 private:
   Ui::MainWindow* ui;

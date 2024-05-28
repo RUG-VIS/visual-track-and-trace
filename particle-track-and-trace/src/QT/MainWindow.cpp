@@ -84,7 +84,6 @@ void MainWindow::setupTechniques() {
   this->timer->SetClientData(program);
   this->timer->setDt(DT);
   intr->AddObserver(vtkCommand::TimerEvent, this->timer);
-  intr->AddObserver(vtkCommand::KeyPressEvent, this->timer);
   intr->CreateRepeatingTimer(17); // 60 fps == 1000 / 60 == 16.7 ms per frame
 }
 
@@ -236,3 +235,6 @@ void MainWindow::on_IregularlySubsampledButton_clicked(bool checked) {
 }
 
 
+void MainWindow::on_pauseButton_clicked(bool checked) {
+  this->timer->togglePaused();
+}

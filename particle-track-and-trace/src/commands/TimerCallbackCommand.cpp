@@ -15,9 +15,7 @@ TimerCallbackCommand* TimerCallbackCommand::New(Program *program) {
 void TimerCallbackCommand::Execute(vtkObject* caller, unsigned long eventId, void* vtkNotUsed(callData)) {
   auto intr = reinterpret_cast<vtkRenderWindowInteractor *>(caller);
   
-  if (eventId == vtkCommand::KeyPressEvent and not strcmp("space", intr->GetKeySym())) {
-    this->paused = ! this->paused;
-  } else if (eventId == vtkCommand::TimerEvent and not this->paused) {
+  if (eventId == vtkCommand::TimerEvent and not this->paused) {
     this->time += this->dt;
   
     if (this->time >= this->maxTime) {

@@ -18,6 +18,7 @@
 #include <QtWidgets/QRadioButton>
 #include <QtWidgets/QVBoxLayout>
 #include <QtWidgets/QWidget>
+#include <QPushButton>
 
 QT_BEGIN_NAMESPACE
 
@@ -54,6 +55,7 @@ public:
     QRadioButton *RegularlySubsampledButton;
     QRadioButton *IregularlySubsampledButton;
     Program *program;
+    QPushButton *pauseButton;
 
     void setupUi(QMainWindow *MainWindow)
     {
@@ -234,6 +236,12 @@ public:
 
         horizontalLayout->addWidget(program);
 
+
+        pauseButton = new QPushButton("pause", settingsBox);
+        pauseButton->setGeometry(QRect(QPoint(100, 100), QSize(200, 50)));
+        pauseButton->setObjectName(QString::fromUtf8("pauseButton"));
+        verticalLayout_3->addWidget(pauseButton);
+
         MainWindow->setCentralWidget(centralWidget);
 
         retranslateUi(MainWindow);
@@ -265,6 +273,7 @@ public:
         FullySampledButton->setText(QCoreApplication::translate("MainWindow", "Fully sampled", nullptr));
         RegularlySubsampledButton->setText(QCoreApplication::translate("MainWindow", "Regularly subsampled", nullptr));
         IregularlySubsampledButton->setText(QCoreApplication::translate("MainWindow", "Irregularly subsampled", nullptr));
+        pauseButton->setText(QCoreApplication::translate("MainWindow", "Pause Simulation", nullptr));
     } // retranslateUi
 
 };
