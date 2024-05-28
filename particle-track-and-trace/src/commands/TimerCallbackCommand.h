@@ -12,6 +12,7 @@ public:
 
   void setProgram(Program *program);
   void setPaused(const bool val);
+  void togglePaused();
 
   void setDt(int dt);
 

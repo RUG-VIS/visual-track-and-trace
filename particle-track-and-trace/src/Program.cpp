@@ -1,3 +1,4 @@
+#include <qurl.h>
 #include <stdexcept>
 #include <vtkRenderWindow.h>
 #include <vtkPointData.h>
@@ -18,6 +19,7 @@
 #include <vtkGenericOpenGLRenderWindow.h>
 #include <vtkCallbackCommand.h>
 #include <vtkInteractorStyleUser.h>
+#include <QKeyEvent>
 
 #include "Program.h"
 #include "commands/TimerCallbackCommand.h"
@@ -129,4 +131,8 @@ vtkSmartPointer<vtkCamera> Program::getCamera() {
 
 std::vector<Technique *> Program::getTechniques() {
   return this->techniques;
+}
+
+vtkSmartPointer<vtkRenderWindowInteractor> Program::getInteractor() {
+  return this->interact;
 }

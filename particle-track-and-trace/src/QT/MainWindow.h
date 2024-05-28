@@ -2,7 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include "../advection/UVGrid.h"
+#include "../commands/TimerCallbackCommand.h"
 
 namespace Ui {
 class MainWindow;
@@ -14,6 +14,8 @@ class MainWindow : public QMainWindow {
 public:
   explicit MainWindow(QWidget* parent = 0);
   ~MainWindow();
+
+  void keyPressEvent(QKeyEvent *ev);
 
 private slots:
   void on_FirstButton_clicked(bool checked);
@@ -33,6 +35,7 @@ private slots:
 
 private:
   Ui::MainWindow* ui;
+  vtkSmartPointer<TimerCallbackCommand> timer;
 
   void setupTechniques();
 };

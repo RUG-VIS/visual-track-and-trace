@@ -2,23 +2,27 @@
 #include "ui_mainwindow.h"
 
 #include <QFile>
+#include <QKeyEvent>
 #include <QFileDialog>
 #include <QMessageBox>
 
 #include <vtkDataSetReader.h>
 
-#include "../layers/BackgroundImage.h"
-#include "../layers/EColLayer.h"
-#include "../layers/EGlyphLayer.h"
-#include "../layers/LGlyphLayer.h"
-#include "../layers/LColLayer.h"
 #include "../Program.h"
 #include "../advection/UVGrid.h"
 #include "../advection/kernel/RK4AdvectionKernel.h"
 #include "../advection/kernel/SnapBoundaryConditionKernel.h"
+#include "../commands/TimerCallbackCommand.h"
+#include "../layers/BackgroundImage.h"
+#include "../layers/EColLayer.h"
+#include "../layers/EGlyphLayer.h"
+#include "../layers/LColLayer.h"
+#include "../layers/LGlyphLayer.h"
 #include "../layers/enums.h"
 
 using namespace std;
+
+#define DT 3600
 
 MainWindow::MainWindow(QWidget* parent)
   : QMainWindow(parent)
@@ -60,8 +64,8 @@ void MainWindow::setupTechniques() {
   auto kernelRK4_2 = make_unique<RK4AdvectionKernel>(uvGrid);
   auto kernelRK4BoundaryChecked_2 = make_unique<SnapBoundaryConditionKernel>(std::move(kernelRK4_2), uvGrid);
   auto lCol = new LColLayer(uvGrid, std::move(kernelRK4BoundaryChecked_2));
-  lGlyph->setDt(3600);
-  lCol->setDt(3600);
+  lGlyph->setDt(DT);
+  lCol->setDt(DT);
 
   technique1->addLayer(lGlyph);
   technique2->addLayer(lCol); 
@@ -73,9 +77,23 @@ void MainWindow::setupTechniques() {
 
   // TODO: implement feature to call this function on widget
   // l->spoofPoints();
-  // l->cycleGlyphStyle();
+
+  // Setup timer
+  auto intr = program->getInteractor();
+  this->timer = vtkSmartPointer<TimerCallbackCommand>::New(program);
+  this->timer->SetClientData(program);
+  this->timer->setDt(DT);
+  intr->AddObserver(vtkCommand::TimerEvent, this->timer);
+  intr->AddObserver(vtkCommand::KeyPressEvent, this->timer);
+  intr->CreateRepeatingTimer(17); // 60 fps == 1000 / 60 == 16.7 ms per frame
 }
 
+
+void MainWindow::keyPressEvent(QKeyEvent *ev) {
+  if (ev->key() == Qt::Key_Space)  {
+    this->timer->togglePaused();
+  }
+}
 
 /* --------------------------------------------------------------------
  * +                    QTWidget callbacks                            +

@@ -28,6 +28,10 @@ void TimerCallbackCommand::Execute(vtkObject* caller, unsigned long eventId, voi
   }
 }
 
+void TimerCallbackCommand::togglePaused() {
+  this->paused = !this->paused;
+}
+
 void TimerCallbackCommand::setProgram(Program *program) {
   this->program = program;
 }

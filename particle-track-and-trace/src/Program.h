@@ -81,6 +81,9 @@ public:
 
   std::vector<Technique *> getTechniques();
 
+
+  vtkSmartPointer<vtkRenderWindowInteractor> getInteractor();
+
 };
 
 #endif
