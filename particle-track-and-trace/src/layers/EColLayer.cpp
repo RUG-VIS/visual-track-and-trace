@@ -24,6 +24,7 @@
 #include <vtkArrowSource.h>
 
 #include "../CartographicTransformation.h"
+#include "luts.h"
 
 using std::numbers::pi;
 
@@ -38,58 +39,40 @@ EColLayer::EColLayer(std::shared_ptr<UVGrid> uvGrid) {
   this->numLats = uvGrid->latSize;
   this->numLons = uvGrid->lonSize;
 
-  this->strength = vtkSmartPointer<vtkDoubleArray>::New();
-  this->strength->SetName("strength");
-  this->strength->SetNumberOfComponents(1);
-  this->strength->SetNumberOfTuples((numLats-1)*(numLons-1));
+  this->lutIdx = vtkSmartPointer<vtkIntArray>::New();
+  this->lutIdx->SetName("lutIdx");
+  this->lutIdx->SetNumberOfComponents(1);
+  this->lutIdx->SetNumberOfTuples((numLats-1)*(numLons-1));
 
-  this->direction = vtkSmartPointer<vtkDoubleArray>::New();
-  this->direction->SetName("direction");
-  this->direction->SetNumberOfComponents(1);
-  this->direction->SetNumberOfTuples((numLats-1)*(numLons-1));
-
+  calcMaxStrength();
+  buildLuts();
   readCoordinates();
 }
 
-/**
-  * Sets a given rgba colour to a range of values [start, end] in the lut.
-  * @param lut : lookuptable to operate on.
-  * @ param start : starting index of range to assign
-  * @ param end: ending index of range to assign
-  * @param r : red value [0,1]
-  * @param g : green value [0,1]
-  * @param n : blue value [0,1]
-  * @param a : alpha value [0,1]
-  */
-void setLutRange(vtkSmartPointer<vtkLookupTable> lut, int start, int end, double r, double g, double b, double a) {
-  for (int i=start; i <= end; i++) {
-    lut->SetTableValue(i, r, g, b, a);
-  }
+void EColLayer::buildLuts() {
+  this->tables.push_back(buildCyclicComplementary());
+  this->tables.push_back(buildCyclicContrasting());
+  this->tables.push_back(buildCyclicMonochromatic());
+  this->tables.push_back(buildCyclicDesaturated());
+
+  this->activeColourMode = COMPLEMENTARY;
+  this->activeSaturationMode = SATURATED;
 }
 
-// builds a 4-way lookuptable, used to encode the directional component
-vtkSmartPointer<vtkLookupTable> buildLutDirs() {
-  vtkNew<vtkLookupTable> lut;
-  lut->SetNumberOfColors(360);
-  lut->SetTableRange(0, 359);
-  lut->SetScaleToLinear();
-  lut->Build();
-  //currently builds a corkO cyclic colour map, divided into 8 colours (see https://www.fabiocrameri.ch/cycliccolourmaps/)
-  setLutRange(lut, 000, 020, 0.247, 0.243, 0.227, 1);
-  setLutRange(lut, 021, 060, 0.243, 0.267, 0.365, 1);
-  setLutRange(lut, 061, 100, 0.318, 0.416, 0.557, 1);
-  setLutRange(lut, 101, 140, 0.518, 0.620, 0.729, 1);
-  setLutRange(lut, 141, 180, 0.667, 0.757, 0.773, 1);
-  setLutRange(lut, 181, 220, 0.631, 0.769, 0.651, 1);
-  setLutRange(lut, 221, 260, 0.451, 0.639, 0.435, 1);
-  setLutRange(lut, 261, 300, 0.298, 0.431, 0.224, 1);
-  setLutRange(lut, 301, 340, 0.263, 0.310, 0.173, 1);
-  setLutRange(lut, 341, 359, 0.247, 0.243, 0.227, 1);
+void EColLayer::calcMaxStrength() {
+  double u1 = uvGrid->uMin,
+         u2 = uvGrid->uMax,
+         v1 = uvGrid->vMin,
+         v2 = uvGrid->vMax;
 
-  lut->SetNanColor(0,0,0,0);
+  double a = sqrt(u1*u1 + v1*v1);
+  double b = sqrt(u1*u1 + v2*v2);
+  double c = sqrt(u2*u2 + v1*v1);
+  double d = sqrt(u2*u2 + v2*v2);
 
-  return lut;
+  this->maxStrength = max(a, max(b, max(c, d)));
 }
+
 
 // TODO: Bit of a superfunction here; can do with some refactoring.
 void EColLayer::readCoordinates() {
@@ -134,34 +117,26 @@ void EColLayer::readCoordinates() {
         }
         u /= 4;
         v /= 4;
-        this->strength->SetTuple1(cellId, std::sqrt(u*u + v*v));
-        this->direction->SetTuple1(cellId++, atan(u/v)*180/pi);
+        this->lutIdx->SetTuple1(cellId++, calcIndex(u,v, this->maxStrength));
       }
       latIndex++;
     }
     lonIndex++;
   }
 
-  data->GetCellData()->AddArray(this->strength);
-  data->GetCellData()->AddArray(this->direction);
-  // data->GetCellData()->SetActiveScalars("strength");
+  data->GetCellData()->AddArray(this->lutIdx);
+  data->GetCellData()->SetActiveScalars("lutIdx");
 
-  vtkNew<vtkPolyDataMapper>(mapper);
-  mapper->SetInputData(data);
-  mapper->SetLookupTable(buildLutDirs());
-  mapper->UseLookupTableScalarRangeOn();
-  mapper->Update();
-  data->GetCellData()->SetActiveScalars("direction");
+  this->mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
+  this->mapper->SetInputData(data);
+  setColourMode(COMPLEMENTARY);
+  this->mapper->UseLookupTableScalarRangeOn();
+  this->mapper->Update();
 
   vtkNew<vtkActor> actor;
-  actor->SetMapper(mapper);
+  actor->SetMapper(this->mapper);
   actor->GetProperty()->SetColor(0, 1, 0);
   actor->GetProperty()->SetOpacity(0.5);
-
-  // vtkNew<vtkActor> act2;
-  // act2->SetMapper(mapper);
-  // act2->GetProperty()->SetRepresentationToWireframe();
-  // ren->AddActor(act2);
 
   this->ren->AddActor(actor);
 }
@@ -181,9 +156,50 @@ void EColLayer::updateData(int t)   {
       }
       u /= 4;
       v /= 4;
-      this->strength->SetTuple1(i, std::sqrt(u*u + v*v));
-      this->direction->SetTuple1(i++, atan(u/v)*180/pi);
+      this->lutIdx->SetTuple1(i++, calcIndex(u,v, this->maxStrength));
     }
   }
-  this->strength->Modified();
+  this->lutIdx->Modified();
+}
+
+
+void EColLayer::setColourMode(ColourMode mode) {
+  this->activeColourMode = mode;
+  if (this->activeSaturationMode == DESATURATED) return;
+  
+  this->mapper->SetLookupTable(this->tables[mode]);
+}
+
+void EColLayer::setSaturationMode(SaturationMode mode) {
+  this->activeSaturationMode = mode;
+
+  if (mode == DESATURATED) {
+    this->mapper->SetLookupTable(this->tables[mode]);
+  } else {
+    this->mapper->SetLookupTable(this->tables[this->activeColourMode]);
+  }
+}
+
+
+int calcIndex(double u, double v, double maxStren) {
+  int angleIdx = calcAngleIndex(u,v);
+  int strIdx = calcStrengthIndex(u,v, maxStren);
+
+  return angleIdx+strIdx*10;
+}
+
+int calcAngleIndex(double u, double v) {
+  double angle = (atan2(v,u)+pi) * 180 / pi;
+  return (int)std::floor(angle/360*10) % 10;
+}
+
+// TODO: there's room for improvement in this function.
+// Currently maps all strengths to [0,10) where 10 is assigned when strength >= maxStrength/2
+// But this is completely heuristic - a more accurate calculation could take into account mean/std of velocity strengths, or do something more fancy with the maxStrength value.
+int calcStrengthIndex(double u, double v, double maxStren) {
+  double strength = sqrt(u*u + v*v);
+  int idx = strength/(maxStren/2)*10;
+
+  if (idx > 9) idx = 9;
+  return idx;
 }

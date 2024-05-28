@@ -19,6 +19,7 @@
 #include <vtkCamera.h>
 
 #include "../CartographicTransformation.h"
+#include "luts.h"
 
 vtkSmartPointer<SpawnPointCallback> LGlyphLayer::createSpawnPointCallback() {
   vtkNew<SpawnPointCallback> newPointCallBack;
@@ -27,62 +28,13 @@ vtkSmartPointer<SpawnPointCallback> LGlyphLayer::createSpawnPointCallback() {
   newPointCallBack->setUVGrid(this->uvGrid);
   newPointCallBack->setBeached(this->particlesBeached);
   newPointCallBack->setAge(this->particlesAge);
+  newPointCallBack->setIdx(this->lutIdx);
   return newPointCallBack;
 }
 
-// Further notes; current thinking is to allow tracking a particle's age by using a scalar array in the VtkPolyData. This would be incremented for every tick/updateData function call.
-
-/**
- * Build and returns a vtkLookupTable for the given number of colours in grayscale.
- * @param n : number of colours to add to the SetTableRange
- * @return : a vtkLookupTable with grayscale colours from [1,1,1,1] to [0.25, 0.25, 0.25, 1] in n steps.
- */
-vtkSmartPointer<vtkLookupTable> buildLutBrightness(int n) {
-  vtkNew<vtkLookupTable> lut;
-  lut->SetNumberOfColors(n);
-  lut->SetTableRange(0, n);
-  lut->SetScaleToLinear();
-  lut->Build();
-  for (int i=0; i < n; i++) {
-    lut->SetTableValue(i, 1-(0.75*i/(n-1)), 1-(0.75*i/(n-1)), 1-(0.75*i/(n-1)), 1);
-  }
-  lut->UseAboveRangeColorOn();
-  lut->SetAboveRangeColor(0.2, 0.2, 0.2, 1);
-  
-  // We cheat a little here: any particle with an age of -1 is out of bounds, and thus set invisible.
-  lut->UseBelowRangeColorOn();
-  lut->SetBelowRangeColor(1,1,1,0);
-
-  return lut;
-}
-
-/**
- * Build and returns a vtkLookupTable for the given number of colours in grayscale.
- * @param n : number of colours to add to the SetTableRange
- * @return : a vtkLookupTable with grayscale colours from [1,1,1,1] to [1,1,1,0.25] in n steps.
- */
-vtkSmartPointer<vtkLookupTable> buildLutOpacity(int n) {
-  vtkNew<vtkLookupTable> lut;
-  lut->SetNumberOfColors(n);
-  lut->SetTableRange(0, n);
-  lut->SetScaleToLinear();
-  lut->Build();
-  for (int i=0; i < n; i++) {
-    lut->SetTableValue(i, 1, 0, 1, 1-(0.75*i/(n-1)));
-  }
-  lut->UseAboveRangeColorOn();
-  lut->SetAboveRangeColor(1,0,1,0.20);
-  
-  // We cheat a little here: any particle with an age of -1 is out of bounds, and thus set invisible.
-  lut->UseBelowRangeColorOn();
-  lut->SetBelowRangeColor(1,1,1,0);
-
-  return lut;
-}
 
 LGlyphLayer::LGlyphLayer(std::shared_ptr<UVGrid> uvGrid, std::unique_ptr<AdvectionKernel> advectionKernel) {
-  this->luts.push(buildLutOpacity(512));
-  this->luts.push(buildLutBrightness(512));
+  buildLuts();
 
   this->ren = vtkSmartPointer<vtkRenderer>::New();
   this->ren->SetLayer(2);
@@ -92,16 +44,14 @@ LGlyphLayer::LGlyphLayer(std::shared_ptr<UVGrid> uvGrid, std::unique_ptr<Advecti
   data->SetPoints(this->points);
 
   this->particlesBeached = vtkSmartPointer<vtkIntArray>::New();
-  this->particlesBeached->SetName("particlesBeached");
-  this->particlesBeached->SetNumberOfComponents(0);
-
   this->particlesAge = vtkSmartPointer<vtkIntArray>::New();
-  this->particlesAge->SetName("particlesAge");
-  this->particlesAge->SetNumberOfComponents(0);
 
-  data->GetPointData()->AddArray(this->particlesBeached);
-  data->GetPointData()->AddArray(this->particlesAge);
-  data->GetPointData()->SetActiveScalars("particlesAge");
+  this->lutIdx = vtkSmartPointer<vtkIntArray>::New();
+  this->lutIdx->SetName("lutIdx");
+  this->lutIdx->SetNumberOfComponents(0);
+
+  data->GetPointData()->AddArray(this->lutIdx);
+  data->GetPointData()->SetActiveScalars("lutIdx");
 
   advector = std::move(advectionKernel);
   this->uvGrid = uvGrid;
@@ -124,11 +74,7 @@ LGlyphLayer::LGlyphLayer(std::shared_ptr<UVGrid> uvGrid, std::unique_ptr<Advecti
   this->mapper->SetInputConnection(glyph2D->GetOutputPort());
   this->mapper->SetColorModeToMapScalars();
 
-  auto lut = this->luts.front();
-  mapper->SetLookupTable(lut);
-  this->luts.pop();
-  this->luts.push(lut);
-
+  setColourMode(COMPLEMENTARY);
   this->mapper->UseLookupTableScalarRangeOn();
   this->mapper->Update();
   
@@ -138,6 +84,17 @@ LGlyphLayer::LGlyphLayer(std::shared_ptr<UVGrid> uvGrid, std::unique_ptr<Advecti
   this->ren->AddActor(actor);
 
   this->callback = createSpawnPointCallback();
+}
+
+
+void LGlyphLayer::buildLuts() {
+  this->tables.push_back(buildComplementary());
+  this->tables.push_back(buildComplementary());
+  this->tables.push_back(buildComplementary());
+  this->tables.push_back(buildDesaturated());
+
+  this->activeColourMode = COMPLEMENTARY;
+  this->activeSaturationMode = SATURATED;
 }
 
 void LGlyphLayer::spoofPoints() {
@@ -162,8 +119,8 @@ void LGlyphLayer::updateData(int t) {
     this->points->GetPoint(n, point);
     if (point[0] <= this->uvGrid->lonMin() or point[0] >= this->uvGrid->lonMax() or point[1] <= this->uvGrid->latMin() or point[1] >= this->uvGrid->latMax()) {
       // sets any particle out of bounds to be beached - so it gets assigned the right colour in the lookup table.
-      this->particlesBeached->SetValue(n, this->beachedAtNumberOfTimes+1);
       this->particlesAge->SetValue(n, -1);
+      this->lutIdx->SetTuple1(n, -1);
       continue;
     }
     
@@ -186,17 +143,32 @@ void LGlyphLayer::updateData(int t) {
       // if the particle's location remains unchanged, increase beachedFor number. Else, decrease it and update point position.
       if (oldX == point[0] and oldY == point[1]) {
         this->particlesBeached->SetValue(n, beachedFor+1);
+        this->lutIdx->SetTuple1(n, beachedFor == this->beachedAtNumberOfTimes-2 ? calcIndex(age+1, true) : calcIndex(age+1, false));
       } else {
         this->particlesBeached->SetValue(n, std::max(beachedFor-1, 0));
         this->points->SetPoint(n, point);
+        this->lutIdx->SetTuple1(n, calcIndex(age+1, false));
         modifiedData = true;
       }
+    } else {
+      this->lutIdx->SetTuple1(n, calcIndex(age+1, true));
     }
   }
   if (modifiedData) {
     this->particlesAge->Modified();
     this->points->Modified();
   }
+}
+
+int LGlyphLayer::calcIndex(int age, bool beached) {
+  // particle out of bounds.
+  if (age == -1) return -1;
+
+  int mod = beached ? 50 : 0;
+  int ageCalc = age/60;
+  if (ageCalc >= 50) ageCalc = 49;
+
+  return ageCalc + mod;
 }
 
 void LGlyphLayer::addObservers(vtkSmartPointer<vtkRenderWindowInteractor> interactor) {
@@ -212,12 +184,24 @@ void LGlyphLayer::removeObservers(vtkSmartPointer<vtkRenderWindowInteractor> int
 }
 
 
-void LGlyphLayer::cycleGlyphStyle() {
-  auto lut = this->luts.front();
-  this->mapper->SetLookupTable(lut);
-  this->luts.pop();
-  this->luts.push(lut);
+void LGlyphLayer::setColourMode(ColourMode mode) {
+
+  this->activeColourMode = mode;
+  if (this->activeSaturationMode == DESATURATED) return;
+  
+  this->mapper->SetLookupTable(this->tables[mode]);
 }
+
+void LGlyphLayer::setSaturationMode(SaturationMode mode) {
+  this->activeSaturationMode = mode;
+
+  if (mode == DESATURATED) {
+    this->mapper->SetLookupTable(this->tables[mode]);
+  } else {
+    this->mapper->SetLookupTable(this->tables[this->activeColourMode]);
+  }
+}
+
 
 void LGlyphLayer::setDt(int dt) {
   this->dt = dt;

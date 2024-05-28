@@ -50,9 +50,9 @@ void Technique::unbind(vtkSmartPointer<vtkRenderWindow> win, vtkSmartPointer<vtk
 }
 
 
-void Technique::setColorMode(ColourMode mode) {
+void Technique::setColourMode(ColourMode mode) {
   for (Layer *l : this->layers) {
-    l->setColorMode(mode);
+    l->setColourMode(mode);
   }
 }
 

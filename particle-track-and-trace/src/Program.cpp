@@ -57,7 +57,7 @@ Program::Program(QWidget *parent): QVTKOpenGLNativeWidget(parent) {
   setRenderWindow(this->win);
   this->interact = win->GetInteractor();
   this->cam = createNormalisedCamera();
-  this->activeIdx = -1;
+  this->activeTech = NOTECH;
 
   this->win->SetNumberOfLayers(0);
   setWinProperties();
@@ -75,38 +75,44 @@ void Program::removeTechnique(Technique *technique) {
   auto it = std::find(this->techniques.begin(), this->techniques.end(), technique);
   if (it != this->techniques.end()) {
     int idx = it - this->techniques.begin();
-    if (idx == this->activeIdx) {
+    if (idx == this->activeTech) {
       throw std::out_of_range("Can't remove active technique.");
     }
     this->techniques.erase(it);
-    this->activeIdx = -1;
-    setActiveTechnique(0);
+    this->activeTech = NOTECH;
+    setActiveTechnique(COLGLYPH);
   }
+}
+
+void Program::requestRender() {
+  this->win->Render();
 }
 
 void Program::updateData(int t) {
   // FIXME: think on how to update techniques; do we update all? just active? unsure.
   win->Render();
-  this->techniques[this->activeIdx]->updateData(t);
+  for (Technique *tech : this->techniques) {
+    tech->updateData(t);
+  }
 }
 
-void Program::setActiveTechnique(int idx) {
+void Program::setActiveTechnique(ActiveTechnique tech) {
   // Only change things if a different technique has been selected.
-  if (idx == this->activeIdx) {
+  if (tech == this->activeTech) {
     return;
   }
 
   // check the given idx is valid.
-  if (idx >= this->techniques.size()) {
+  if (tech >= this->techniques.size()) {
     throw std::out_of_range("Index out of range!");
   }
 
-  if (this->activeIdx >= 0 and this->activeIdx < this->techniques.size())
-    this->techniques[this->activeIdx]->unbind(this->win, this->interact);
+  if (this->activeTech >= 0 and this->activeTech < this->techniques.size())
+    this->techniques[this->activeTech]->unbind(this->win, this->interact);
 
-  this->techniques[idx]->bind(this->win, this->interact);
+  this->techniques[tech]->bind(this->win, this->interact);
   
-  this->activeIdx = idx;
+  this->activeTech = tech;
   this->win->Render();
 }
 

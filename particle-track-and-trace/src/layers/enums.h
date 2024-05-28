@@ -2,6 +2,7 @@
 #define ENUMS_H
 
 enum ActiveTechnique {
+  NOTECH = -1,
   COLGLYPH = 0,
   GLYPHCOL = 1,
 };
@@ -16,7 +17,7 @@ enum ColourMode {
 
 enum SaturationMode {
   SATURATED = 0,
-  DESATURATED = 1,
+  DESATURATED = 3,
 };
 
 

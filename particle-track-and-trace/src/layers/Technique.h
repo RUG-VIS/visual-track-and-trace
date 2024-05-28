@@ -7,6 +7,7 @@
 #include "enums.h"
 
 class Technique {
+  //TODO: comments
 private:
   std::vector<Layer *> layers;
   vtkSmartPointer<vtkCamera> cam;
@@ -20,7 +21,7 @@ public:
   void bind(vtkSmartPointer<vtkRenderWindow> win, vtkSmartPointer<vtkRenderWindowInteractor> intr); 
   void unbind(vtkSmartPointer<vtkRenderWindow> win, vtkSmartPointer<vtkRenderWindowInteractor> intr);
 
-  void setColorMode(ColourMode mode);
+  void setColourMode(ColourMode mode);
   void setSaturationMode(SaturationMode mode);
   void setGlyphStyle(GlyphStyle style);
   void setSamplingMode(SamplingMode mode);

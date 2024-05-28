@@ -19,7 +19,7 @@ private:
   /** This attribute models a variable number of vtkRenderers, managed through the abstract Technique class.
     */ 
   std::vector<Technique *> techniques;
-  int activeIdx;
+  ActiveTechnique activeTech;
 
 
   /** The window this program's layers render to.
@@ -72,10 +72,10 @@ public:
     */
   void updateData(int t);
 
+  // TODO: commenting
+  void requestRender();
 
-  // TODO: using an idx to indicate which technique to use is not ideal; use an enum instead? But then the question is where to put it...
-  void setActiveTechnique(int idx);
-
+  void setActiveTechnique(ActiveTechnique tech);
 
   vtkSmartPointer<vtkCamera> getCamera();
 

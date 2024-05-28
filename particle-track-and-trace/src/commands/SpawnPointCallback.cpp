@@ -43,6 +43,7 @@ void SpawnPointCallback::Execute(vtkObject *caller, unsigned long evId, void *ca
     points->InsertNextPoint(worldPos[0], worldPos[1], 0);
     this->particlesBeached->InsertNextValue(0);
     this->particlesAge->InsertNextValue(0);
+    this->lutIdx->InsertNextValue(0);
 
     // FIXME:  The below lines cause some weird interaction with our vtkTimer.
     // see github issue  https://github.com/MakeNEnjoy/interactive-track-and-trace/issues/28
@@ -78,4 +79,9 @@ void SpawnPointCallback::setBeached(const vtkSmartPointer<vtkIntArray> &ints) {
 
 void SpawnPointCallback::setAge(const vtkSmartPointer<vtkIntArray> &ints) {
   this->particlesAge = ints;
+}
+
+
+void SpawnPointCallback::setIdx(const vtkSmartPointer<vtkIntArray> &idx) {
+  this->lutIdx = idx;
 }

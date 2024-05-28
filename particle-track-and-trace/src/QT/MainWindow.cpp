@@ -69,7 +69,7 @@ void MainWindow::setupTechniques() {
   program->addTechnique(technique1);
   program->addTechnique(technique2);
 
-  program->setActiveTechnique(0);
+  program->setActiveTechnique(COLGLYPH);
 
   // TODO: implement feature to call this function on widget
   // l->spoofPoints();
@@ -85,6 +85,7 @@ void MainWindow::setupTechniques() {
 void MainWindow::on_FirstButton_clicked(bool checked) {
   if (checked) {
     ui->program->setActiveTechnique(COLGLYPH);
+    ui->program->requestRender();
   }
 }
 
@@ -92,6 +93,7 @@ void MainWindow::on_FirstButton_clicked(bool checked) {
 void MainWindow::on_SecondButton_clicked(bool checked) {
   if (checked) {
     ui->program->setActiveTechnique(GLYPHCOL);
+    ui->program->requestRender();
   }
 }
 
@@ -99,8 +101,9 @@ void MainWindow::on_SecondButton_clicked(bool checked) {
 void MainWindow::on_ComplementaryButton_clicked(bool checked) {
   if (checked) {
     for (Technique *t : ui->program->getTechniques()) {
-      t->setColorMode(COMPLEMENTARY);
+      t->setColourMode(COMPLEMENTARY);
     }
+    ui->program->requestRender();
   }
 }
 
@@ -108,8 +111,9 @@ void MainWindow::on_ComplementaryButton_clicked(bool checked) {
 void MainWindow::on_ContrastingButton_clicked(bool checked) {
   if (checked) {
     for (Technique *t : ui->program->getTechniques()) {
-      t->setColorMode(CONTRASTING);
+      t->setColourMode(CONTRASTING);
     }
+    ui->program->requestRender();
   }
 }
 
@@ -117,8 +121,9 @@ void MainWindow::on_ContrastingButton_clicked(bool checked) {
 void MainWindow::on_MonochromaticButton_clicked(bool checked) {
   if (checked) {
     for (Technique *t : ui->program->getTechniques()) {
-      t->setColorMode(MONOCHROMATIC);
+      t->setColourMode(MONOCHROMATIC);
     }
+    ui->program->requestRender();
   }
 }
 
@@ -128,6 +133,7 @@ void MainWindow::on_SaturateButton_clicked(bool checked) {
     for (Technique *t : ui->program->getTechniques()) {
       t->setSaturationMode(SATURATED);
     }
+    ui->program->requestRender();
   }
 }
 
@@ -137,6 +143,7 @@ void MainWindow::on_DesaturateButton_clicked(bool checked) {
     for (Technique *t : ui->program->getTechniques()) {
       t->setSaturationMode(DESATURATED);
     }
+    ui->program->requestRender();
   }
 }
 
@@ -146,6 +153,7 @@ void MainWindow::on_CircleButton_clicked(bool checked) {
     for (Technique *t : ui->program->getTechniques()) {
       t->setGlyphStyle(CIRCLE);
     }
+    ui->program->requestRender();
   }
 }
 
@@ -155,6 +163,7 @@ void MainWindow::on_TriangleButton_clicked(bool checked) {
     for (Technique *t : ui->program->getTechniques()) {
       t->setGlyphStyle(TRIANGLE);
     }
+    ui->program->requestRender();
   }
 }
 
@@ -164,6 +173,7 @@ void MainWindow::on_SquareButton_clicked(bool checked) {
     for (Technique *t : ui->program->getTechniques()) {
       t->setGlyphStyle(SQUARE);
     }
+    ui->program->requestRender();
   }
 }
 
@@ -173,6 +183,7 @@ void MainWindow::on_HexagonButton_clicked(bool checked) {
     for (Technique *t : ui->program->getTechniques()) {
       t->setGlyphStyle(HEXAGON);
     }
+    ui->program->requestRender();
   }
 }
 
@@ -182,6 +193,7 @@ void MainWindow::on_FullySampledButton_clicked(bool checked) {
     for (Technique *t : ui->program->getTechniques()) {
       t->setSamplingMode(FULLYSAMPLED);
     }
+    ui->program->requestRender();
   }
 }
 
@@ -191,6 +203,7 @@ void MainWindow::on_RegularlySubsampledButton_clicked(bool checked) {
     for (Technique *t : ui->program->getTechniques()) {
       t->setSamplingMode(REGULARLYSUBSAMPLED);
     }
+    ui->program->requestRender();
   }
 }
 
@@ -200,6 +213,7 @@ void MainWindow::on_IregularlySubsampledButton_clicked(bool checked) {
     for (Technique *t : ui->program->getTechniques()) {
       t->setSamplingMode(IRREGULARLYSUBSAMPLED);
     }
+    ui->program->requestRender();
   }
 }
 

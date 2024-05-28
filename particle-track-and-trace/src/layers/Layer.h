@@ -41,7 +41,8 @@ public:
   virtual void setCamera(vtkSmartPointer<vtkCamera> cam);
 
 
-  virtual void setColorMode(ColourMode mode);
+  // TODO: Comments
+  virtual void setColourMode(ColourMode mode);
   virtual void setSaturationMode(SaturationMode mode);
   virtual void setGlyphStyle(GlyphStyle style);
   virtual void setSamplingMode(SamplingMode mode);

@@ -26,6 +26,14 @@ public:
   size_t lonSize;
 
   /**
+    * Minimum and Maximum values of the u and v variables.
+    */
+  double uMin;
+  double uMax;
+  double vMin;
+  double vMax;
+
+  /**
    * Assuming grid is a regular grid, gives the longitudinal spacing of grid.
    * @return longitudinal spacing
    */

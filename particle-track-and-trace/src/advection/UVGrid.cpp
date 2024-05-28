@@ -31,6 +31,12 @@ UVGrid::UVGrid(string path) {
   for (auto vel: views::zip(us, vs)) {
     uvData.push_back(Vel(vel));
   }
+
+  // FIXME: should really read these from file instead of hard-coding them.
+  this->uMin = -0.381482899188995;
+  this->uMax =  0.566494882106781;
+  this->vMin = -0.381482899188995;
+  this->vMax =  0.470820993185043;
 }
 
 const Vel &UVGrid::operator[](size_t timeIndex, size_t latIndex, size_t lonIndex) const {

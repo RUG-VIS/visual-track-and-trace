@@ -24,6 +24,7 @@ public:
   void setBeached(const vtkSmartPointer<vtkIntArray> &parts);
 
   void setAge(const vtkSmartPointer<vtkIntArray> &parts);
+  void setIdx(const vtkSmartPointer<vtkIntArray> &idx);
 
   void setUVGrid(const std::shared_ptr<UVGrid> &uvGrid);
 
@@ -32,6 +33,7 @@ private:
   vtkSmartPointer<vtkRenderer> ren;
   vtkSmartPointer<vtkIntArray> particlesBeached;
   vtkSmartPointer<vtkIntArray> particlesAge;
+  vtkSmartPointer<vtkIntArray> lutIdx;
   std::shared_ptr<UVGrid> uvGrid;
   vtkSmartPointer<vtkAbstractTransform> inverseCartographicProjection;
 

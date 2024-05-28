@@ -4,7 +4,6 @@
 #include "Layer.h"
 #include "../advection/kernel/AdvectionKernel.h"
 #include "../commands/SpawnPointCallback.h"
-#include <queue>
 #include <vtkPolyData.h>
 #include <vtkInteractorStyle.h>
 
@@ -17,13 +16,20 @@ private:
   vtkSmartPointer<vtkPolyData> data;
   vtkSmartPointer<vtkIntArray> particlesBeached;
   vtkSmartPointer<vtkIntArray> particlesAge;
+  vtkSmartPointer<vtkIntArray> lutIdx;
   vtkSmartPointer<vtkPolyDataMapper> mapper;
   std::unique_ptr<AdvectionKernel> advector;
   std::shared_ptr<UVGrid> uvGrid;
   int dt = 3600;
   int beachedAtNumberOfTimes = 20;
-  std::queue<vtkSmartPointer<vtkLookupTable>> luts;
+  std::vector<vtkSmartPointer<vtkLookupTable>> tables;
+  ColourMode activeColourMode;
+  SaturationMode activeSaturationMode;
   vtkSmartPointer<SpawnPointCallback> callback;
+
+
+  void buildLuts();
+  int calcIndex(int age, bool beached);
 
 public:
   /** Constructor.
@@ -46,9 +52,8 @@ public:
   void addObservers(vtkSmartPointer<vtkRenderWindowInteractor> interactor) override;
   void removeObservers(vtkSmartPointer<vtkRenderWindowInteractor> interactor) override;
 
-  /** This function cycles which lut is used for the layer, according to the lookuptables in the luts attribute.
-   */
-  void cycleGlyphStyle();
+  void setColourMode(ColourMode mode) override;
+  void setSaturationMode(SaturationMode mode) override;
 
   /** 
    * Sets a custom DT value, needed for advect calls to the simulation logic.

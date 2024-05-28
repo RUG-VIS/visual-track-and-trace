@@ -21,6 +21,9 @@
 
 #include "../CartographicTransformation.h"
 
+// TODO: spawning one particle per event is nice and all, but for a colour map doesnt really look great
+// potential solution: spawn a number of particles randomly around the selected point instead.
+// Would involve a custom callback function probably.
 vtkSmartPointer<SpawnPointCallback> LColLayer::createSpawnPointCallback() {
   vtkNew<SpawnPointCallback> newPointCallBack;
   newPointCallBack->setPoints(this->points);
@@ -28,6 +31,7 @@ vtkSmartPointer<SpawnPointCallback> LColLayer::createSpawnPointCallback() {
   newPointCallBack->setUVGrid(this->uvGrid);
   newPointCallBack->setBeached(this->particlesBeached);
   newPointCallBack->setAge(this->particlesAge);
+  newPointCallBack->setIdx(this->lutIdx);
   return newPointCallBack;
 }
 
@@ -79,6 +83,10 @@ LColLayer::LColLayer(std::shared_ptr<UVGrid> uvGrid, std::unique_ptr<AdvectionKe
   this->particlesAge = vtkSmartPointer<vtkIntArray>::New();
   this->particlesAge->SetName("particlesAge");
   this->particlesAge->SetNumberOfComponents(1);
+
+  this->lutIdx = vtkSmartPointer<vtkIntArray>::New();
+  this->lutIdx->SetName("lutIdx");
+  this->lutIdx->SetNumberOfComponents(1);
 
 
   // pipeline 2

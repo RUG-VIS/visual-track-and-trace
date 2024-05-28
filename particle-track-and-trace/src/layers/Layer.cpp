@@ -14,10 +14,11 @@ void Layer::setCamera(vtkSmartPointer<vtkCamera> cam) {
 }
 
 
+// do nothing by default for these functions.
 void Layer::updateData(int t) {}
 void Layer::addObservers(vtkSmartPointer<vtkRenderWindowInteractor> interactor) {}
 void Layer::removeObservers(vtkSmartPointer<vtkRenderWindowInteractor> interactor) {}
-void Layer::setColorMode(ColourMode mode) {}
+void Layer::setColourMode(ColourMode mode) {}
 void Layer::setSaturationMode(SaturationMode mode) {}
 void Layer::setGlyphStyle(GlyphStyle style) {}
 void Layer::setSamplingMode(SamplingMode mode) {}
