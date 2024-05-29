@@ -14,11 +14,16 @@ class LColLayer : public Layer {
 private:
   vtkSmartPointer<vtkPoints> points;
   vtkSmartPointer<vtkPolyData> data;
+  vtkSmartPointer<vtkPolyDataMapper> mapper;
   vtkSmartPointer<vtkIntArray> particlesBeached;
   vtkSmartPointer<vtkIntArray> particlesAge;
   vtkSmartPointer<vtkIntArray> lutIdx;
   vtkSmartPointer<vtkIntArray> cellParticleDensity;
+  vtkSmartPointer<vtkIntArray> cellParticleAge;
   vtkSmartPointer<SpawnPointCallback> callback;
+  std::vector<vtkSmartPointer<vtkLookupTable>> tables;
+  ColourMode activeColourMode;
+  SaturationMode activeSaturationMode;
   std::unique_ptr<AdvectionKernel> advector;
   std::shared_ptr<UVGrid> uvGrid;
   int dt = 3600;
@@ -26,8 +31,7 @@ private:
   int numLats;
   int numLons;
 
-
-  int calcIndex(double x, double y);
+  void buildLuts();
 
 public:
   /** Constructor.
@@ -51,10 +55,17 @@ public:
   void removeObservers(vtkSmartPointer<vtkRenderWindowInteractor> interactor) override;
 
 
+  void setColourMode(ColourMode mode) override;
+  void setSaturationMode(SaturationMode mode) override;
+
   /** 
    * Sets a custom DT value, needed for advect calls to the simulation logic.
    */ 
   void setDt(int dt);
 };
+
+// TODO: comments
+int calcIndex(const int age, const int density);
+int calcCellIndex(const double u, const double v, const std::shared_ptr<UVGrid> uvGrid);
 
 #endif

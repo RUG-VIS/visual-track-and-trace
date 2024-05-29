@@ -120,7 +120,7 @@ void LGlyphLayer::updateData(int t) {
     if (point[0] <= this->uvGrid->lonMin() or point[0] >= this->uvGrid->lonMax() or point[1] <= this->uvGrid->latMin() or point[1] >= this->uvGrid->latMax()) {
       // sets any particle out of bounds to be beached - so it gets assigned the right colour in the lookup table.
       this->particlesAge->SetValue(n, -1);
-      this->lutIdx->SetTuple1(n, -1);
+      this->lutIdx->SetValue(n, -1);
       continue;
     }
     
@@ -143,15 +143,15 @@ void LGlyphLayer::updateData(int t) {
       // if the particle's location remains unchanged, increase beachedFor number. Else, decrease it and update point position.
       if (oldX == point[0] and oldY == point[1]) {
         this->particlesBeached->SetValue(n, beachedFor+1);
-        this->lutIdx->SetTuple1(n, beachedFor == this->beachedAtNumberOfTimes-2 ? calcIndex(age+1, true) : calcIndex(age+1, false));
+        this->lutIdx->SetValue(n, beachedFor == this->beachedAtNumberOfTimes-2 ? calcIndex(age+1, true) : calcIndex(age+1, false));
       } else {
         this->particlesBeached->SetValue(n, std::max(beachedFor-1, 0));
         this->points->SetPoint(n, point);
-        this->lutIdx->SetTuple1(n, calcIndex(age+1, false));
+        this->lutIdx->SetValue(n, calcIndex(age+1, false));
         modifiedData = true;
       }
     } else {
-      this->lutIdx->SetTuple1(n, calcIndex(age+1, true));
+      this->lutIdx->SetValue(n, calcIndex(age+1, true));
     }
   }
   if (modifiedData) {

@@ -117,7 +117,7 @@ void EColLayer::readCoordinates() {
         }
         u /= 4;
         v /= 4;
-        this->lutIdx->SetTuple1(cellId++, calcIndex(u,v, this->maxStrength));
+        this->lutIdx->SetValue(cellId++, calcIndex(u,v, this->maxStrength));
       }
       latIndex++;
     }
@@ -156,7 +156,7 @@ void EColLayer::updateData(int t)   {
       }
       u /= 4;
       v /= 4;
-      this->lutIdx->SetTuple1(i++, calcIndex(u,v, this->maxStrength));
+      this->lutIdx->SetValue(i++, calcIndex(u,v, this->maxStrength));
     }
   }
   this->lutIdx->Modified();

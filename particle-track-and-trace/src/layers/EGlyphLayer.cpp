@@ -69,7 +69,7 @@ void EGlyphLayer::readCoordinates() {
 
   vtkNew<vtkGlyphSource2D> arrowSource;
   arrowSource->SetGlyphTypeToArrow();
-  arrowSource->SetScale(0.2); //TODO: set this properly
+  arrowSource->SetScale(0.2); 
   arrowSource->Update();
 
   vtkNew<vtkGlyph2D> glyph2D;

@@ -20,6 +20,9 @@
 #include <vtkCamera.h>
 
 #include "../CartographicTransformation.h"
+#include "luts.h"
+
+using namespace std;
 
 // TODO: spawning one particle per event is nice and all, but for a colour map doesnt really look great
 // potential solution: spawn a number of particles randomly around the selected point instead.
@@ -36,33 +39,12 @@ vtkSmartPointer<SpawnPointCallback> LColLayer::createSpawnPointCallback() {
 }
 
 
-/**
- */
-// TODO: edit this function; probably extract all lut builders into a builder pattern or something.
-vtkSmartPointer<vtkLookupTable> buildLutDens() {
-  int n = 5;
-  vtkNew<vtkLookupTable> lut;
-  lut->SetNumberOfColors(n);
-  lut->SetTableRange(1, n+1);
-  lut->SetScaleToLinear();
-  lut->Build();
-  for (int i=n-1; i >= 0; i--) {
-    lut->SetTableValue(i, 0, 1-(0.75*i/(n-1)), 1, 1);
-  }
-  lut->UseAboveRangeColorOn();
-  lut->SetAboveRangeColor(1,0,0,1);
-  
-  lut->UseBelowRangeColorOn();
-  lut->SetBelowRangeColor(1,1,1,0);
-
-  return lut;
-
-}
-
 // There's two separate pipelines going on here: the one where we build a vtkPoints array for the spawnpointcallback,
 // and the one where we build a vtkPolyData with Cells for the colour map.
 // TODO: it would make sense to separate these pipelines out to their own functions.
-LColLayer::LColLayer(std::shared_ptr<UVGrid> uvGrid, std::unique_ptr<AdvectionKernel> advectionKernel) {
+LColLayer::LColLayer(shared_ptr<UVGrid> uvGrid, unique_ptr<AdvectionKernel> advectionKernel) {
+  buildLuts();
+
   // general management; probably should be the actual constructor.
   this->ren = vtkSmartPointer<vtkRenderer>::New();
   this->ren->SetLayer(2);
@@ -78,15 +60,14 @@ LColLayer::LColLayer(std::shared_ptr<UVGrid> uvGrid, std::unique_ptr<AdvectionKe
 
   this->particlesBeached = vtkSmartPointer<vtkIntArray>::New();
   this->particlesBeached->SetName("particlesBeached");
-  this->particlesBeached->SetNumberOfComponents(1);
 
   this->particlesAge = vtkSmartPointer<vtkIntArray>::New();
   this->particlesAge->SetName("particlesAge");
-  this->particlesAge->SetNumberOfComponents(1);
 
   this->lutIdx = vtkSmartPointer<vtkIntArray>::New();
   this->lutIdx->SetName("lutIdx");
-  this->lutIdx->SetNumberOfComponents(1);
+  this->lutIdx->SetNumberOfTuples((numLats-1)*(numLons-1));
+  this->lutIdx->Fill(-1);
 
 
   // pipeline 2
@@ -97,12 +78,15 @@ LColLayer::LColLayer(std::shared_ptr<UVGrid> uvGrid, std::unique_ptr<AdvectionKe
   data->Allocate((numLats-1)*(numLons-1));
 
   this->cellParticleDensity = vtkSmartPointer<vtkIntArray>::New();
-  this->cellParticleDensity->SetName("cellParticleDensity");
-  this->cellParticleDensity->SetNumberOfComponents(1);
   this->cellParticleDensity->SetNumberOfTuples((numLats-1)*(numLons-1));
+  this->cellParticleDensity->Fill(0);
 
-  this->data->GetCellData()->AddArray(this->cellParticleDensity);
-  this->data->GetCellData()->SetActiveScalars("cellParticleDensity");
+  this->cellParticleAge = vtkSmartPointer<vtkIntArray>::New();
+  this->cellParticleAge->SetNumberOfTuples((numLats-1)*(numLons-1));
+  this->cellParticleDensity->Fill(0);
+
+  this->data->GetCellData()->AddArray(this->lutIdx);
+  this->data->GetCellData()->SetActiveScalars("lutIdx");
 
   vtkSmartPointer<vtkTransformFilter> transformFilter = createCartographicTransformFilter(uvGrid);
   auto transform = transformFilter->GetTransform();
@@ -127,32 +111,37 @@ LColLayer::LColLayer(std::shared_ptr<UVGrid> uvGrid, std::unique_ptr<AdvectionKe
         l->SetId(3, idx);
 
         this->data->InsertNextCell(VTK_QUAD, l);
-        this->cellParticleDensity->SetTuple1(cellId++, 0);
       }
       latIndex++;
     }
     lonIndex++;
   }
 
-  vtkNew<vtkPolyDataMapper>(mapper);
-  mapper->SetInputData(data);
-  mapper->SetLookupTable(buildLutDens());
-  mapper->UseLookupTableScalarRangeOn();
-  mapper->Update();
+  this->mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
+  this->mapper->SetInputData(data);
+  setColourMode(COMPLEMENTARY);
+  this->mapper->UseLookupTableScalarRangeOn();
+  this->mapper->Update();
 
   vtkNew<vtkActor> actor;
-  actor->SetMapper(mapper);
-  actor->GetProperty()->SetColor(0, 1, 0);
-  actor->GetProperty()->SetOpacity(0.5);
-
-  // vtkNew<vtkActor> act2;
-  // act2->SetMapper(mapper);
-  // act2->GetProperty()->SetRepresentationToWireframe();
-  // this->ren->AddActor(act2);
+  actor->SetMapper(this->mapper);
+  // actor->GetProperty()->SetOpacity(0.5);
+  actor->GetProperty()->SetOpacity(1);
 
   this->ren->AddActor(actor);
 
   this->callback = createSpawnPointCallback();
+}
+
+
+void LColLayer::buildLuts() {
+  this->tables.push_back(buildDensityComplementary());
+  this->tables.push_back(buildDensityContrasting());
+  this->tables.push_back(buildDensityMonochromatic());
+  this->tables.push_back(buildDensityDesaturated());
+
+  this->activeColourMode = COMPLEMENTARY;
+  this->activeSaturationMode = SATURATED;
 }
 
 void LColLayer::spoofPoints() {
@@ -166,15 +155,7 @@ void LColLayer::spoofPoints() {
   this->points->Modified();
 }
 
-// calculates the cellIndex for a given lat,lon pair.
-int LColLayer::calcIndex(double x, double y) {
-  int lonIndex = std::floor((x - uvGrid->lonMin()) / uvGrid->lonStep());
-  int latIndex = std::floor((y - uvGrid->latMin()) / uvGrid->latStep());
-
-  return latIndex+lonIndex*(uvGrid->latSize-1);
-}
-
-
+// FIXME: delete this once done testing
 void printArray(vtkSmartPointer<vtkIntArray> data, int numLons, int numLats, int latsize) {
   for (int i=0; i < numLons-1; i++) {
     for (int j=0; j < numLats-1; j++) {
@@ -189,8 +170,8 @@ void printArray(vtkSmartPointer<vtkIntArray> data, int numLons, int numLats, int
 void LColLayer::updateData(int t) {
   const int SUPERSAMPLINGRATE = 4;
   double point[3], oldX, oldY;
-  bool modifiedData = false;
   this->cellParticleDensity->Fill(0);
+  this->cellParticleAge->Fill(0);
 
   // iterate over every point.
   for (vtkIdType n=0; n < this->points->GetNumberOfPoints(); n++) {
@@ -216,28 +197,27 @@ void LColLayer::updateData(int t) {
 
       // supersampling
       for (int i=0; i < SUPERSAMPLINGRATE; i++) {
-        std::tie(point[1], point[0]) = advector->advect(t, point[1], point[0], this->dt/SUPERSAMPLINGRATE);
+        tie(point[1], point[0]) = advector->advect(t, point[1], point[0], this->dt/SUPERSAMPLINGRATE);
       }
 
       // if the particle's location remains unchanged, increase beachedFor number. Else, decrease it and update point position.
       if (oldX == point[0] and oldY == point[1]) {
         this->particlesBeached->SetValue(n, beachedFor+1);
       } else {
-        this->particlesBeached->SetValue(n, std::max(beachedFor-1, 0));
+        this->particlesBeached->SetValue(n, max(beachedFor-1, 0));
         this->points->SetPoint(n, point);
-        modifiedData = true;
       }
     }
     // add point to cellparticleDensity
-    int index = calcIndex(point[0], point[1]);
+    int index = calcCellIndex(point[0], point[1], uvGrid);
     this->cellParticleDensity->SetValue(index, cellParticleDensity->GetValue(index)+1);
+    this->cellParticleAge->SetValue(index, cellParticleAge->GetValue(index)+age+1);
   }
-  if (modifiedData) {
-    this->particlesAge->Modified();
-    this->points->Modified();
-    this->cellParticleDensity->Modified();
+
+  for (int idx=0; idx < (numLons-1)*(numLats-1); idx++) {
+    this->lutIdx->SetValue(idx, calcIndex(this->cellParticleAge->GetValue(idx), this->cellParticleDensity->GetValue(idx)));
   }
-  // printArray(this->cellParticleDensity, numLons, numLats, uvGrid->latSize-1);
+  this->lutIdx->Modified();
 }
 
 void LColLayer::addObservers(vtkSmartPointer<vtkRenderWindowInteractor> interactor) {
@@ -256,3 +236,38 @@ void LColLayer::removeObservers(vtkSmartPointer<vtkRenderWindowInteractor> inter
 void LColLayer::setDt(int dt) {
   this->dt = dt;
 }
+
+
+void LColLayer::setColourMode(ColourMode mode) {
+  this->activeColourMode = mode;
+  if (this->activeSaturationMode == DESATURATED) return;
+  
+  this->mapper->SetLookupTable(this->tables[mode]);
+}
+
+void LColLayer::setSaturationMode(SaturationMode mode) {
+  this->activeSaturationMode = mode;
+
+  if (mode == DESATURATED) {
+    this->mapper->SetLookupTable(this->tables[mode]);
+  } else {
+    this->mapper->SetLookupTable(this->tables[this->activeColourMode]);
+  }
+}
+
+// TODO: this function can do with some improvement as well; it's completely heuristic right now.
+int calcIndex(const int age, const int density) {
+  if (not density) return -1;
+  int calcAge = (double)age/density/60;
+  return min(9, calcAge)+min(9, density)*10;
+}
+
+
+int calcCellIndex(const double u, const double v, const shared_ptr<UVGrid> uvGrid) {
+  int lonIndex = floor((u - uvGrid->lonMin()) / uvGrid->lonStep());
+  int latIndex = floor((v - uvGrid->latMin()) / uvGrid->latStep());
+
+  return latIndex+lonIndex*(uvGrid->latSize-1);
+}
+
+

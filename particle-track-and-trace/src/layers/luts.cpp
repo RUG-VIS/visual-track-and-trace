@@ -74,7 +74,7 @@ vtkSmartPointer<vtkLookupTable> buildCyclicComplementary() {
   lut->Build();
 
   int idx=0;
-  for (double opacity=0.1; opacity <= 1.0; opacity+=0.1) {
+  for (double opacity=0.5; opacity <= 1.0; opacity+=0.05) {
     lut->SetTableValue(idx++, 0.247059, 0.243137, 0.227451, opacity);
     lut->SetTableValue(idx++, 0.243137, 0.266667, 0.364706, opacity);
     lut->SetTableValue(idx++, 0.329412, 0.431373, 0.580392, opacity);
@@ -178,22 +178,88 @@ vtkSmartPointer<vtkLookupTable> buildCyclicDesaturated() {
 
 // LCol tables
 vtkSmartPointer<vtkLookupTable> buildDensityComplementary() {
+  // uses a reverse matplotlib YlGn colour map.
   vtkNew<vtkLookupTable> lut;
+  lut->SetNumberOfColors(100);
+  lut->SetTableRange(0, 99);
+  lut->SetScaleToLinear();
+  lut->Build();
 
+  int idx=0;
+  for (double opacity=0.5; opacity <= 1.0; opacity+=0.05) {
+    lut->SetTableValue(idx++, 0.0, 0.27058823529411763, 0.1607843137254902, opacity);
+    lut->SetTableValue(idx++, 0.0, 0.3911572472126105, 0.20901191849288736, opacity);
+    lut->SetTableValue(idx++, 0.10388312187620147, 0.4909496347558632, 0.2513033448673587, opacity);
+    lut->SetTableValue(idx++, 0.21568627450980393, 0.6196078431372549, 0.330718954248366, opacity);
+    lut->SetTableValue(idx++, 0.3724721261053441, 0.7283044982698962, 0.424559784698193, opacity);
+    lut->SetTableValue(idx++, 0.5651364859669358, 0.8175009611687812, 0.5119723183391004, opacity);
+    lut->SetTableValue(idx++, 0.7359477124183007, 0.8915032679738563, 0.5843137254901961, opacity);
+    lut->SetTableValue(idx++, 0.8795847750865051, 0.9526182237600923, 0.6601922337562476, opacity);
+    lut->SetTableValue(idx++, 0.9724413687043445, 0.9896655132641292, 0.7464667435601692, opacity);
+    lut->SetTableValue(idx++, 1.0, 1.0, 0.8980392156862745, opacity);
+  }
+
+  lut->UseBelowRangeColorOn();
+  lut->SetBelowRangeColor(0,0,0,0);
+  lut->SetNanColor(0.0,0,0,0);
   return lut;  
 }
 
 
 vtkSmartPointer<vtkLookupTable> buildDensityContrasting() {
+  // uses the matplotlib viridis colour map.
   vtkNew<vtkLookupTable> lut;
+  lut->SetNumberOfColors(100);
+  lut->SetTableRange(0, 99);
+  lut->SetScaleToLinear();
+  lut->Build();
 
+  int idx=0;
+  for (double opacity=0.5; opacity <= 1.0; opacity+=0.05) {
+    lut->SetTableValue(idx++, 0.267004, 0.004874, 0.329415, opacity);
+    lut->SetTableValue(idx++, 0.281412, 0.155834, 0.469201, opacity);
+    lut->SetTableValue(idx++, 0.244972, 0.287675, 0.53726, opacity);
+    lut->SetTableValue(idx++, 0.190631, 0.407061, 0.556089, opacity);
+    lut->SetTableValue(idx++, 0.147607, 0.511733, 0.557049, opacity);
+    lut->SetTableValue(idx++, 0.119699, 0.61849, 0.536347, opacity);
+    lut->SetTableValue(idx++, 0.20803, 0.718701, 0.472873, opacity);
+    lut->SetTableValue(idx++, 0.430983, 0.808473, 0.346476, opacity);
+    lut->SetTableValue(idx++, 0.709898, 0.868751, 0.169257, opacity);
+    lut->SetTableValue(idx++, 0.993248, 0.906157, 0.143936, opacity);
+  }
+
+  lut->UseBelowRangeColorOn();
+  lut->SetBelowRangeColor(0,0,0,0);
+  lut->SetNanColor(0.0,0,0,0);
   return lut;  
 }
 
 
 vtkSmartPointer<vtkLookupTable> buildDensityMonochromatic() {
+  // uses a reverse matplotlib Greens colour map.
   vtkNew<vtkLookupTable> lut;
+  lut->SetNumberOfColors(100);
+  lut->SetTableRange(0, 99);
+  lut->SetScaleToLinear();
+  lut->Build();
 
+  int idx=0;
+  for (double opacity=0.5; opacity <= 1.0; opacity+=0.05) {
+    lut->SetTableValue(idx++, 0.0, 0.26666666666666666, 0.10588235294117647, opacity);
+    lut->SetTableValue(idx++, 0.0, 0.4079046520569012, 0.16444444444444445, opacity);
+    lut->SetTableValue(idx++, 0.10388312187620147, 0.5164936562860438, 0.2467512495194156, opacity);
+    lut->SetTableValue(idx++, 0.21568627450980393, 0.6287581699346405, 0.3333333333333333, opacity);
+    lut->SetTableValue(idx++, 0.36392156862745095, 0.7240292195309497, 0.4181468665897732, opacity);
+    lut->SetTableValue(idx++, 0.5351787773933102, 0.8060899653979239, 0.5287504805843906, opacity);
+    lut->SetTableValue(idx++, 0.681045751633987, 0.8718954248366013, 0.6562091503267974, opacity);
+    lut->SetTableValue(idx++, 0.8089965397923875, 0.9251672433679354, 0.7834525182622069, opacity);
+    lut->SetTableValue(idx++, 0.9066205305651672, 0.9641214917339485, 0.8884429065743944, opacity);
+    lut->SetTableValue(idx++, 0.9686274509803922, 0.9882352941176471, 0.9607843137254902, opacity);
+  }
+
+  lut->UseBelowRangeColorOn();
+  lut->SetBelowRangeColor(0,0,0,0);
+  lut->SetNanColor(0.0,0,0,0);
   return lut;  
 }
 
