@@ -22,7 +22,6 @@
 #include <QKeyEvent>
 
 #include "Program.h"
-#include "commands/TimerCallbackCommand.h"
 #include "CartographicTransformation.h"
 #include "commands/CameraMoveCallback.h"
 
@@ -81,7 +80,6 @@ void Program::requestRender() {
 }
 
 void Program::updateData(int t) {
-  // FIXME: think on how to update techniques; do we update all? just active? unsure.
   win->Render();
   for (Technique *tech : this->techniques) {
     tech->updateData(t);

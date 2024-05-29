@@ -100,7 +100,7 @@ LColLayer::LColLayer(std::shared_ptr<UVGrid> uvGrid, std::unique_ptr<AdvectionKe
   this->cellParticleDensity->SetName("cellParticleDensity");
   this->cellParticleDensity->SetNumberOfComponents(1);
   this->cellParticleDensity->SetNumberOfTuples((numLats-1)*(numLons-1));
-  
+
   this->data->GetCellData()->AddArray(this->cellParticleDensity);
   this->data->GetCellData()->SetActiveScalars("cellParticleDensity");
 

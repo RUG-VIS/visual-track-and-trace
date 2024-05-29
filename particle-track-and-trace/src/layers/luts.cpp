@@ -75,16 +75,16 @@ vtkSmartPointer<vtkLookupTable> buildCyclicComplementary() {
 
   int idx=0;
   for (double opacity=0.1; opacity <= 1.0; opacity+=0.1) {
-    lut->SetTableValue(idx++,  0, 1, 1, opacity);
-    lut->SetTableValue(idx++,  0, 0.9, 0.9, opacity);
-    lut->SetTableValue(idx++,  0, 0.8, 0.8, opacity);
-    lut->SetTableValue(idx++, 0, 0.7, 0.7, opacity);
-    lut->SetTableValue(idx++, 0, 0.6, 0.6, opacity);
-    lut->SetTableValue(idx++, 0, 0.5, 0.5, opacity);
-    lut->SetTableValue(idx++, 0, 0.4, 0.4, opacity);
-    lut->SetTableValue(idx++,  0, 0.3, 0.3, opacity);
-    lut->SetTableValue(idx++,  0, 0.2, 0.2, opacity);
-    lut->SetTableValue(idx++,  0, 0.1, 0.1, opacity);
+    lut->SetTableValue(idx++, 0.247059, 0.243137, 0.227451, opacity);
+    lut->SetTableValue(idx++, 0.243137, 0.266667, 0.364706, opacity);
+    lut->SetTableValue(idx++, 0.329412, 0.431373, 0.580392, opacity);
+    lut->SetTableValue(idx++, 0.517647, 0.619608, 0.729412, opacity);
+    lut->SetTableValue(idx++, 0.678431, 0.768627, 0.784314, opacity);
+    lut->SetTableValue(idx++, 0.631373, 0.768627, 0.65098, opacity);
+    lut->SetTableValue(idx++, 0.45098, 0.639216, 0.435294, opacity);
+    lut->SetTableValue(idx++, 0.309804, 0.45098, 0.231373, opacity);
+    lut->SetTableValue(idx++, 0.262745, 0.309804, 0.172549, opacity);
+    lut->SetTableValue(idx++, 0.247059, 0.243137, 0.227451, opacity);
   }
 
   lut->SetNanColor(0.0,0,0,0);
