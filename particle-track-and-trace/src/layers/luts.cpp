@@ -14,7 +14,8 @@ vtkSmartPointer<vtkLookupTable> buildComplementary() {
 
   vtkNew<vtkColorTransferFunction> colorTransferFunction;
   colorTransferFunction->AddRGBPoint(0, 0.317647, 0.52549, 0.329412);
-  colorTransferFunction->AddRGBPoint(49, 0.584, 0.584, 0.584);
+  colorTransferFunction->AddRGBPoint(49, 0.082, 0.129, 0.082);
+
 
   double c[3];
   int idx=0;
@@ -43,8 +44,8 @@ vtkSmartPointer<vtkLookupTable> buildDesaturated() {
   lut->Build();
 
   vtkNew<vtkColorTransferFunction> colorTransferFunction;
-  colorTransferFunction->AddRGBPoint(0, 0.313725, 0.313725, 0.313725);
-  colorTransferFunction->AddRGBPoint(49, 0.909804, 0.909804, 0.909804);
+  colorTransferFunction->AddRGBPoint(0, 0.909804, 0.909804, 0.909804);
+  colorTransferFunction->AddRGBPoint(49, 0.313725, 0.313725, 0.313725);
 
   double c[3];
   int idx=0;
@@ -265,7 +266,29 @@ vtkSmartPointer<vtkLookupTable> buildDensityMonochromatic() {
 
 
 vtkSmartPointer<vtkLookupTable> buildDensityDesaturated() {
+  // uses a modified grayC colour map.
+  // https://www.fabiocrameri.ch/colourmaps/
   vtkNew<vtkLookupTable> lut;
+  lut->SetNumberOfColors(100);
+  lut->SetTableRange(0, 99);
+  lut->SetScaleToLinear();
+  lut->Build();
 
+  vtkNew<vtkColorTransferFunction> colorTransferFunction;
+  colorTransferFunction->AddRGBPoint(0, 0.313725, 0.313725, 0.313725);
+  colorTransferFunction->AddRGBPoint(9, 0.909804, 0.909804, 0.909804);
+  double c[3];
+
+  int idx=0;
+  for (double opacity=0.5; opacity <= 1.0; opacity+=0.05) {
+    for (int i=0; i < 10; i++) {
+      colorTransferFunction->GetColor(i, c);
+      lut->SetTableValue(idx++, c[0], c[1], c[2], opacity);
+    }
+  }
+
+  lut->UseBelowRangeColorOn();
+  lut->SetBelowRangeColor(0,0,0,0);
+  lut->SetNanColor(0.0,0,0,0);
   return lut;  
 }
