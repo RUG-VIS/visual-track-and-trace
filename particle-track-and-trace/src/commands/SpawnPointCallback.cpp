@@ -9,13 +9,6 @@
 
 #include "../CartographicTransformation.h"
 
-void convertDisplayToWorld(vtkRenderer *renderer, int x, int y, double *worldPos) {
-  double displayPos[3] = {static_cast<double>(x), static_cast<double>(y), 0.0};
-  renderer->SetDisplayPoint(displayPos);
-  renderer->DisplayToWorld();
-  renderer->GetWorldPoint(worldPos);
-}
-
 void SpawnPointCallback::Execute(vtkObject *caller, unsigned long evId, void *callData) {
     // Note the use of reinterpret_cast to cast the caller to the expected type.
     auto interactor = reinterpret_cast<vtkRenderWindowInteractor *>(caller);

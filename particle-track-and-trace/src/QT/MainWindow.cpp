@@ -20,6 +20,7 @@
 #include "../layers/LGlyphLayer.h"
 #include "../layers/enums.h"
 #include "../layers/LegendLayer.h"
+#include "../layers/TimeLayer.h"
 
 using namespace std;
 
@@ -56,6 +57,11 @@ void MainWindow::setupTechniques() {
   // add legend layer
   technique1->addLayer(new LegendLayer(dataPath + "/legends", "COLGLYPH"));
   technique2->addLayer(new LegendLayer(dataPath + "/legends", "GLYPHCOL"));
+
+  // add date/time layer
+  auto tm = new TimeLayer();
+  technique1->addLayer(tm);
+  technique1->addLayer(tm);
 
   // add Euler layers
   technique1->addLayer(new EColLayer(uvGrid));
