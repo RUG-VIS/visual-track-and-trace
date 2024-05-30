@@ -30,7 +30,6 @@ string TimeLayer::secondsToDate(int t) {
   
   this->lastT = t;
   return string("year " + std::to_string(years) + ", day " + std::to_string(days));
-  // return string("seconds  " + std::to_string(t));
 }
 
 

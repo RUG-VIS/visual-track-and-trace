@@ -3,8 +3,8 @@
 #include "QT/MainWindow.h"
 
 // TODO: make Lagrangian Layers share one vtkPoints for seemless technique swiching
-// TODO: yoink Robin's isNearestNeighbourZero function to improve beaching
 // TODO: add a button to reset the simulation - set time=0 and reset points array of particles.
+// TODO: yoink Robin's isNearestNeighbourZero function to improve beaching
 // FIXME: go over each function and add const where appropriate.
 // FIXME: rotate ECol monochromatic layer
 
