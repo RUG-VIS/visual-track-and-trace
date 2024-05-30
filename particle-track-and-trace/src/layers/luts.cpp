@@ -88,6 +88,8 @@ vtkSmartPointer<vtkLookupTable> buildCyclicComplementary() {
     lut->SetTableValue(idx++, 0.247059, 0.243137, 0.227451, opacity);
   }
 
+  lut->SetBelowRangeColor(0,0,0,0);
+  lut->UseBelowRangeColorOn();
   lut->SetNanColor(0.0,0,0,0);
   return lut;  
 }
@@ -116,6 +118,8 @@ vtkSmartPointer<vtkLookupTable> buildCyclicContrasting() {
     lut->SetTableValue(idx++, 0.447059, 0.223529, 0.34902, opacity);
   }
 
+  lut->SetBelowRangeColor(0,0,0,0);
+  lut->UseBelowRangeColorOn();
   lut->SetNanColor(0.0,0,0,0);
   return lut;  
 }
@@ -144,6 +148,8 @@ vtkSmartPointer<vtkLookupTable> buildCyclicMonochromatic() {
     lut->SetTableValue(idx++, 0.180392, 0.494118, 0.698039, opacity);
   }
 
+  lut->SetBelowRangeColor(0,0,0,0);
+  lut->UseBelowRangeColorOn();
   lut->SetNanColor(0.0,0,0,0);
   return lut;  
 }
@@ -160,18 +166,20 @@ vtkSmartPointer<vtkLookupTable> buildCyclicDesaturated() {
 
   int idx=0.0;
   for (double opacity=0.1; opacity <= 1.0; opacity+=0.1) {
-    lut->SetTableValue(idx++, 44, 44, 44, opacity);
-    lut->SetTableValue(idx++, 56, 56, 56, opacity);
-    lut->SetTableValue(idx++, 85, 85, 85, opacity);
-    lut->SetTableValue(idx++, 114, 114, 114, opacity);
-    lut->SetTableValue(idx++, 149, 149, 149, opacity);
-    lut->SetTableValue(idx++, 146, 146, 146, opacity);
-    lut->SetTableValue(idx++, 110, 110, 110, opacity);
-    lut->SetTableValue(idx++, 78, 78, 78, opacity);
-    lut->SetTableValue(idx++, 52, 52, 52, opacity);
-    lut->SetTableValue(idx++, 45, 45, 45, opacity);
+    lut->SetTableValue(idx++, 0.172549, 0.172549, 0.172549, opacity);
+    lut->SetTableValue(idx++, 0.219608, 0.219608, 0.219608, opacity);
+    lut->SetTableValue(idx++, 0.333333, 0.333333, 0.333333, opacity);
+    lut->SetTableValue(idx++, 0.447059, 0.447059, 0.447059, opacity);
+    lut->SetTableValue(idx++, 0.584314, 0.584314, 0.584314, opacity);
+    lut->SetTableValue(idx++, 0.572549, 0.572549, 0.572549, opacity);
+    lut->SetTableValue(idx++, 0.431373, 0.431373, 0.431373, opacity);
+    lut->SetTableValue(idx++, 0.305882, 0.305882, 0.305882, opacity);
+    lut->SetTableValue(idx++, 0.203922, 0.203922, 0.203922, opacity);
+    lut->SetTableValue(idx++, 0.176471, 0.176471, 0.176471, opacity);
   }
 
+  lut->SetBelowRangeColor(0,0,0,0);
+  lut->UseBelowRangeColorOn();
   lut->SetNanColor(0.0,0,0,0);
   return lut;  
 }

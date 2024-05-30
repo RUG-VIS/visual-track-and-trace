@@ -19,6 +19,7 @@
 #include "../layers/LColLayer.h"
 #include "../layers/LGlyphLayer.h"
 #include "../layers/enums.h"
+#include "../layers/LegendLayer.h"
 
 using namespace std;
 
@@ -51,6 +52,10 @@ void MainWindow::setupTechniques() {
   auto bg = new BackgroundImage(dataPath + "/map_qgis_1035.png");
   technique1->addLayer(bg);
   technique2->addLayer(bg);
+
+  // add legend layer
+  technique1->addLayer(new LegendLayer(dataPath + "/legends", "COLGLYPH"));
+  technique2->addLayer(new LegendLayer(dataPath + "/legends", "GLYPHCOL"));
 
   // add Euler layers
   technique1->addLayer(new EColLayer(uvGrid));

@@ -125,7 +125,7 @@ LColLayer::LColLayer(shared_ptr<UVGrid> uvGrid, unique_ptr<AdvectionKernel> adve
 
   vtkNew<vtkActor> actor;
   actor->SetMapper(this->mapper);
-  // actor->GetProperty()->SetOpacity(0.5);
+  actor->GetProperty()->SetOpacity(0.5);
   actor->GetProperty()->SetOpacity(1);
 
   this->ren->AddActor(actor);

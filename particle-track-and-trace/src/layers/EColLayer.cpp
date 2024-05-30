@@ -182,6 +182,7 @@ void EColLayer::setSaturationMode(SaturationMode mode) {
 
 
 int calcIndex(double u, double v, double maxStren) {
+  if (not u and not v) return -1;
   int angleIdx = calcAngleIndex(u,v);
   int strIdx = calcStrengthIndex(u,v, maxStren);
 

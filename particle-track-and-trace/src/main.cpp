@@ -2,7 +2,7 @@
 #include <QVTKOpenGLNativeWidget.h>
 #include "QT/MainWindow.h"
 
-// TODO: add a widget to act as legend. This is fourfold: particle-age, LCol-density, Lcol-age, ECol-direction ECol-strength?
+// TODO: add a widget to act as legend. This is fourfold: LCol-density, Lcol-age, ECol-strength?
 // TODO: add text widget showing simulation time (in days/weeks/months from 0).
 // TODO: make Lagrangian Layers share one vtkPoints for seemless technique switching
 // TODO: make LColLayer use a modified spawnpointCallback to spawn multiple particles per interaction
@@ -10,6 +10,9 @@
 // TODO: yoink Robin's isNearestNeighbourZero function to improve beaching
 // TODO: add a button to reset the simulation - set time=0 and reset points array of particles.
 // FIXME: go over each function and add const where appropriate.
+// FIXME: rotate ECol monochromatic layer
+
+// COULDHAVE: the Legends are just statically rendered images; ideally these would be created along with the luts and then displayed accordingly.
 
 int main(int argc, char* argv[]) {
   QSurfaceFormat::setDefaultFormat(QVTKOpenGLNativeWidget::defaultFormat());
