@@ -1,5 +1,5 @@
 #include "LGlyphLayer.h"
-#include "../commands/SpawnPointCallback.h"
+#include "../commands/SingularSpawnPointCallback.h"
 #include <vtkActor2D.h>
 #include <vtkGlyph2D.h>
 #include <vtkLookupTable.h>
@@ -9,6 +9,7 @@
 #include <vtkPolyDataMapper2D.h>
 #include <vtkProperty.h>
 #include <vtkProperty2D.h>
+#include <vtkRenderWindowInteractor.h>
 #include <vtkVertexGlyphFilter.h>
 #include <vtkInteractorStyle.h>
 #include <vtkInteractorStyleUser.h>
@@ -22,7 +23,7 @@
 #include "luts.h"
 
 vtkSmartPointer<SpawnPointCallback> LGlyphLayer::createSpawnPointCallback() {
-  vtkNew<SpawnPointCallback> newPointCallBack;
+  vtkNew<SingularSpawnPointCallback> newPointCallBack;
   newPointCallBack->setPoints(this->points);
   newPointCallBack->setRen(this->ren);
   newPointCallBack->setUVGrid(this->uvGrid);

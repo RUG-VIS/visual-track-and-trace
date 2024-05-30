@@ -71,6 +71,10 @@ add_executable(ParticleTrackTrace MACOSX_BUNDLE main.cpp
         commands/TimerCallbackCommand.cpp
         commands/SpawnPointCallback.h
         commands/SpawnPointCallback.cpp
+        commands/SingularSpawnPointCallback.h
+        commands/SingularSpawnPointCallback.cpp
+        commands/MassSpawnPointCallback.h
+        commands/MassSpawnPointCallback.cpp
         commands/CameraMoveCallback.cpp
         commands/CameraMoveCallback.h
         CartographicTransformation.cpp

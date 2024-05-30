@@ -1,57 +1,8 @@
 #include "SpawnPointCallback.h"
 
-#include <vtkVertex.h>
-#include <vtkRenderer.h>
-#include <vtkRenderWindowInteractor.h>
 #include <vtkSmartPointer.h>
-#include <vtkCommand.h>
-#include <vtkRenderWindow.h>
 
 #include "../CartographicTransformation.h"
-
-void SpawnPointCallback::Execute(vtkObject *caller, unsigned long evId, void *callData) {
-    // Note the use of reinterpret_cast to cast the caller to the expected type.
-    auto interactor = reinterpret_cast<vtkRenderWindowInteractor *>(caller);
-
-    if (evId == vtkCommand::LeftButtonPressEvent) {
-        dragging = true;
-    }
-    if (evId == vtkCommand::LeftButtonReleaseEvent) {
-        dragging = false;
-    }
-    if (!dragging) {
-        return;
-    }
-
-    int x, y;
-    interactor->GetEventPosition(x, y);
-
-    double worldPos[4] = {2, 0 ,0, 0};
-    double displayPos[3] = {static_cast<double>(x), static_cast<double>(y), 0.0};
-    ren->SetDisplayPoint(displayPos);
-    ren->DisplayToWorld();
-    ren->GetWorldPoint(worldPos);
-    inverseCartographicProjection->TransformPoint(worldPos, worldPos);
-
-    points->InsertNextPoint(worldPos[0], worldPos[1], 0);
-    this->particlesBeached->InsertNextValue(0);
-    this->particlesAge->InsertNextValue(0);
-    this->lutIdx->InsertNextValue(0);
-
-    // FIXME:  The below lines cause some weird interaction with our vtkTimer.
-    // see github issue  https://github.com/MakeNEnjoy/interactive-track-and-trace/issues/28
-    this->points->Modified();
-    ren->GetRenderWindow()->Render();
-}
-
-
-SpawnPointCallback::SpawnPointCallback() : points(nullptr),
-                                           inverseCartographicProjection(nullptr),
-                                           uvGrid(nullptr) { }
-
-SpawnPointCallback *SpawnPointCallback::New() {
-  return new SpawnPointCallback;
-}
 
 void SpawnPointCallback::setPoints(const vtkSmartPointer<vtkPoints> &points) {
   this->points = points;

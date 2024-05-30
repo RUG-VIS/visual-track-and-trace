@@ -2,33 +2,17 @@
 #define SPAWNPOINTCALLBACK_H
 
 #include <memory>
-#include <vtkCallbackCommand.h>
-#include <vtkRenderWindowInteractor.h>
-#include <vtkPoints.h>
-#include <vtkPolyData.h>
 #include <vtkAbstractTransform.h>
+#include <vtkCallbackCommand.h>
+#include <vtkIntArray.h>
+#include <vtkPoints.h>
+#include <vtkRenderer.h>
+
 
 #include "../advection/UVGrid.h"
 
 class SpawnPointCallback : public vtkCallbackCommand {
-
-public:
-  static SpawnPointCallback *New();
-
-  SpawnPointCallback();
-
-  void setPoints(const vtkSmartPointer<vtkPoints> &points);
-
-  void setRen(const vtkSmartPointer<vtkRenderer> &ren);
-
-  void setBeached(const vtkSmartPointer<vtkIntArray> &parts);
-
-  void setAge(const vtkSmartPointer<vtkIntArray> &parts);
-  void setIdx(const vtkSmartPointer<vtkIntArray> &idx);
-
-  void setUVGrid(const std::shared_ptr<UVGrid> &uvGrid);
-
-private:
+protected:
   vtkSmartPointer<vtkPoints> points;
   vtkSmartPointer<vtkRenderer> ren;
   vtkSmartPointer<vtkIntArray> particlesBeached;
@@ -36,11 +20,19 @@ private:
   vtkSmartPointer<vtkIntArray> lutIdx;
   std::shared_ptr<UVGrid> uvGrid;
   vtkSmartPointer<vtkAbstractTransform> inverseCartographicProjection;
-
-  void Execute(vtkObject *caller, unsigned long evId, void *callData) override;
-
   bool dragging = false;
+
+public:
+  virtual void setPoints(const vtkSmartPointer<vtkPoints> &points);
+
+  virtual void setRen(const vtkSmartPointer<vtkRenderer> &ren);
+
+  virtual void setBeached(const vtkSmartPointer<vtkIntArray> &parts);
+
+  virtual void setAge(const vtkSmartPointer<vtkIntArray> &parts);
+  virtual void setIdx(const vtkSmartPointer<vtkIntArray> &idx);
+
+  virtual void setUVGrid(const std::shared_ptr<UVGrid> &uvGrid);
 };
 
-
-#endif //SPAWNPOINTCALLBACK_H
+#endif

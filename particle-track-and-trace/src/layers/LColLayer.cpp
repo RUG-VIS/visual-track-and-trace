@@ -1,5 +1,3 @@
-#include "LColLayer.h"
-#include "../commands/SpawnPointCallback.h"
 #include <vtkActor2D.h>
 #include <vtkCellData.h>
 #include <vtkGlyph2D.h>
@@ -19,6 +17,8 @@
 #include <vtkRenderWindow.h>
 #include <vtkCamera.h>
 
+#include "LColLayer.h"
+#include "../commands/MassSpawnPointCallback.h"
 #include "../CartographicTransformation.h"
 #include "luts.h"
 
@@ -28,7 +28,7 @@ using namespace std;
 // potential solution: spawn a number of particles randomly around the selected point instead.
 // Would involve a custom callback function probably.
 vtkSmartPointer<SpawnPointCallback> LColLayer::createSpawnPointCallback() {
-  vtkNew<SpawnPointCallback> newPointCallBack;
+  vtkNew<MassSpawnPointCallback> newPointCallBack;
   newPointCallBack->setPoints(this->points);
   newPointCallBack->setRen(this->ren);
   newPointCallBack->setUVGrid(this->uvGrid);

@@ -61,7 +61,7 @@ void MainWindow::setupTechniques() {
   // add date/time layer
   auto tm = new TimeLayer();
   technique1->addLayer(tm);
-  technique1->addLayer(tm);
+  technique2->addLayer(tm);
 
   // add Euler layers
   technique1->addLayer(new EColLayer(uvGrid));

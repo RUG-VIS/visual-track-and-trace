@@ -225,7 +225,6 @@ public:
 
         verticalLayout_16->addWidget(IregularlySubsampledButton);
 
-
         verticalLayout_3->addWidget(ChannelBox);
 
 
@@ -243,6 +242,9 @@ public:
         verticalLayout_3->addWidget(pauseButton);
 
         MainWindow->setCentralWidget(centralWidget);
+
+        // FIXME: remove this line to enable subsampling buttons
+        GlyphBox_2->hide();
 
         retranslateUi(MainWindow);
 
