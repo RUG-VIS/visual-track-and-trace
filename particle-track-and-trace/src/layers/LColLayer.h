@@ -49,23 +49,31 @@ public:
    */
   void updateData(int t) override;
 
+  /** This function sets up the spawnpointcallback.
+   * @return pointer to a new spawnpointcallback.
+   */
   vtkSmartPointer<SpawnPointCallback> createSpawnPointCallback();
+
+  /** Sets a custom DT value, needed for advect calls to the simulation logic.  */ 
+  void setDt(int dt);
+
 
   void addObservers(vtkSmartPointer<vtkRenderWindowInteractor> interactor) override;
   void removeObservers(vtkSmartPointer<vtkRenderWindowInteractor> interactor) override;
-
-
   void setColourMode(ColourMode mode) override;
   void setSaturationMode(SaturationMode mode) override;
 
-  /** 
-   * Sets a custom DT value, needed for advect calls to the simulation logic.
-   */ 
-  void setDt(int dt);
 };
 
-// TODO: comments
+ /** calculates the LookupTableIndex for a given particle age and density.
+  * Assumes a 10x10 lookupTable where each column is a separate age-index and each row is a separate density-index.
+  * @param age : int representing particle age.
+  * @param density : int representing particle density in a given cell.
+  * @return the index in a 10x10 lookupTable
+  */
 int calcIndex(const int age, const int density);
+
+
 int calcCellIndex(const double u, const double v, const std::shared_ptr<UVGrid> uvGrid);
 
 #endif

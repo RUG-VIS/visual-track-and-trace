@@ -41,10 +41,29 @@ public:
   virtual void setCamera(vtkSmartPointer<vtkCamera> cam);
 
 
-  // TODO: Comments
+  /** Sets the colour mode used by this layer.
+    * Actual effect is implementation dependent, but can be expected to change the used lookupTable of the layer in some way.
+    * Note that not all layers are required to implement this function, if they do not support changing colour configuration. 
+    */
   virtual void setColourMode(ColourMode mode);
+
+
+  /** Sets the saturation mode used by this layer.
+    * Actual effect is implementation dependent, but can be expected to change the used lookupTable of the layer in some way.
+    * Note that not all layers are required to implement this function, if they do not support changing saturation configuration. 
+    */
   virtual void setSaturationMode(SaturationMode mode);
+
+  /** Sets the glyph style used by this layer.
+    * Actual effect is implementation dependent, but can be expected to change the shape of used glyphs in some way.
+    * Note that not all layers are required to implement this function, if they do not render glyphs or do not support changing their style.
+    */
   virtual void setGlyphStyle(GlyphStyle style);
+
+  /** Sets the sampling mode used by this layer.
+    * Actual effect is implementation dependent, but can be expected to change the sampling function used in some manner.
+    * Note that not all layers are required to implement this function, if they do not support different sampling modes.
+    */
   virtual void setSamplingMode(SamplingMode mode);
 };
 

@@ -6,10 +6,9 @@
 #include <vtkRenderWindowInteractor.h>
 #include <vtkRenderer.h>
 
-#include "layers/Layer.h"
 #include "layers/Technique.h"
 
-/** This class manages the upper levels of the vtk pipeline; it has attributes for the vtkrenderWindow and a vector of Layers to represent a variable number of vtkRenderers.
+/** This class manages the upper levels of the vtk pipeline; it has attributes for the vtkrenderWindow and a vector of Techniques to represent a variable number of vtkRenderers.
   * It can also set up a vtkTimer by connecting an instance of TimerCallbackCommand with its contained vtkRenderWindowInteractor.
   */ 
 class Program : public QVTKOpenGLNativeWidget {
@@ -67,18 +66,26 @@ public:
     */
   void updateData(int t);
 
-  // TODO: commenting
+  /** This function calls the instance's renderWindow->Render() method.
+    */
   void requestRender();
 
+  /** This function switches the active technique of the instance. 
+    * To do so it unbinds the current active technique, then binds the new one.
+    */
   void setActiveTechnique(ActiveTechnique tech);
 
+  /** Getter for the cam attribute.
+    */
   vtkSmartPointer<vtkCamera> getCamera();
 
+  /** Getter for the techniques attribute.
+    */
   std::vector<Technique *> getTechniques();
 
-
+  /** Getter for the interact attribute.
+    */ 
   vtkSmartPointer<vtkRenderWindowInteractor> getInteractor();
-
 };
 
 #endif

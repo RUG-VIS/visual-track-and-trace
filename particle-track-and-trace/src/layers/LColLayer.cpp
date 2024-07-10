@@ -155,17 +155,6 @@ void LColLayer::spoofPoints() {
   this->points->Modified();
 }
 
-// FIXME: delete this once done testing
-void printArray(vtkSmartPointer<vtkIntArray> data, int numLons, int numLats, int latsize) {
-  for (int i=0; i < numLons-1; i++) {
-    for (int j=0; j < numLats-1; j++) {
-      int value = data->GetValue(j+i*latsize);
-      if (value > 1)
-        cout << "(" << i << ", " << j << ") ("<< j+i*latsize << "): " << value << endl;
-    }
-  }
-  cout << endl;
-}
 
 void LColLayer::updateData(int t) {
   const int SUPERSAMPLINGRATE = 4;
